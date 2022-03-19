@@ -9,10 +9,10 @@ import SwiftUI
 
 struct windowSize {
 	// change let to static - read comments
-	let minWidth : CGFloat = 650
-	let minHeight : CGFloat = 500
-	let maxWidth : CGFloat = 700
-	let maxHeight : CGFloat = 600
+	let minWidth : CGFloat = 1000
+	let minHeight : CGFloat = 700
+	let maxWidth : CGFloat = 1000
+	let maxHeight : CGFloat = 700
 }
 
 struct ContentView: View {
@@ -24,9 +24,14 @@ struct ContentView: View {
 			VStack {
 				TitleText(text: "System Information")
 				VStack(spacing: 10) {
-					ForEach(statusInfo.statusEntries.indices) { i in
-						let entry = statusInfo.statusEntries[i]
-							StatusEntryView(name: entry.name, value: entry.commandValue(), icon: entry.icon)
+					ScrollView {
+						ForEach(statusInfo.statusEntries.indices) { i in
+							VStack {
+								let entry = statusInfo.statusEntries[i]
+									StatusEntryView(name: entry.name, value: entry.commandValue(), icon: entry.icon)
+								Divider()
+							}
+						}
 					}
 				}
 			}

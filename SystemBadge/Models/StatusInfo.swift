@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SystemConfiguration
 import SwiftUI
 
 
@@ -13,6 +14,9 @@ func bashCmd(cmd: String) -> String {
 	return execCommand(command: "bash", args: ["-c", cmd])
 }
 
+func zshCmd(cmd: String) -> String {
+	return execCommand(command: "zsh", args: ["-c", cmd])
+}
 
 func execCommand(command: String, args: [String]) -> String {
 	if !command.hasPrefix("/") {
@@ -29,6 +33,7 @@ func execCommand(command: String, args: [String]) -> String {
 		return String(data: data, encoding: String.Encoding.utf8)!
 	}
 }
+
 
 
 struct StatusEntry {
@@ -71,18 +76,36 @@ struct StatusInfo {
 			icon: Image(systemName: "person")
 		))
 		
-		//userName = NSUserName()
+		// Loop through each network interface and extract the BSD and localized name then gather its IPv4 IP Address
+		for interface in SCNetworkInterfaceCopyAll() as NSArray {
+			if let name = SCNetworkInterfaceGetBSDName(interface as! SCNetworkInterface),
+//			   let type = SCNetworkInterfaceGetInterfaceType(interface as! SCNetworkInterface),
+			   let localizedName = SCNetworkInterfaceGetLocalizedDisplayName(interface as! SCNetworkInterface){
+				let command = "ifconfig \(name) | grep inet | grep -v inet6 | cut -d' ' -f2 | tail -n1"  // This works
+//				let command = "ipconfig getifaddr \(name)"  // This does not work
+				let ip_addr = bashCmd(cmd: command)
+				if ip_addr != "" {
+					statusEntries.append(StatusEntry(name: "\(localizedName) (\(name))",
+													 commandValue: { ()-> String in return "\(ip_addr)"
+																	.trimmingCharacters(in: .whitespacesAndNewlines)
+																   },
+													 icon: Image(systemName: "network")
+													))
+				}
+			}
+		}
 		
-		statusEntries.append(StatusEntry(
-			name: "IP Address",
-			commandValue: { ()-> String in
-				let command = "ifconfig | grep inet | grep -v inet6 | cut -d' ' -f2 | tail -n1"
-				return bashCmd(cmd: command)
-					.trimmingCharacters(in: .whitespacesAndNewlines)
-			},
-			icon: Image(systemName: "network")
-		))
-		
+//		statusEntries.append(StatusEntry(
+//			name: "IP Address",
+//			commandValue: { ()-> String in
+//				let command = "ifconfig | grep inet | grep -v inet6 | cut -d' ' -f2 | tail -n1"
+//				return bashCmd(cmd: command)
+//					.trimmingCharacters(in: .whitespacesAndNewlines)
+//			},
+//			icon: Image(systemName: "network")
+//		))
+//
+			
 		statusEntries.append(StatusEntry(
 			name: "Public IP Address",
 			commandValue: { ()-> String in

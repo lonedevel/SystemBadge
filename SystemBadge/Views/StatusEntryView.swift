@@ -16,24 +16,25 @@ struct StatusEntryView: View {
     var body: some View {
 		HStack {
 			icon
-				.frame(width: 35.0, height: 35.0)
+				.frame(width: 35.0, height: 35.0, alignment: .leading)
 //				.opacity(0.4)
 				.foregroundColor(.blue)
 			Text(name)
 				.font(.body)
-				.foregroundColor(Color.teal)
-				.bold()
-				.frame(width: 180.0, alignment: .center)
-				.background(
-					Capsule()
-						.fill(.black)
+				.foregroundColor(Color.white)
+//				.bold()
+				.frame(width: 250.0, alignment: .trailing)
+//				.background(
+//					Capsule()
+//						.fill(.black)
 						
-				)
+//				)
+			Divider()
 			Text(value)
 				.font(Font.custom("Enhanced Dot Digital-7", size: 18))
-				.foregroundColor(.green)
+				.foregroundColor(Color("MetricColor"))
 //				.bold()
-				.frame(width: 400.0, alignment: .leading)
+				.frame(width: 500.0, alignment: .leading)
 //				.background(
 //					Rectangle()
 //						.fill(.gray)
