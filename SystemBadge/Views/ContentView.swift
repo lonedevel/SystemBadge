@@ -7,23 +7,33 @@
 
 import SwiftUI
 
+class BadgeInfo: ObservableObject {
+	@Published var name: String
+	init() {
+		name = "System Badge"
+	}
+}
 struct windowSize {
 	// change let to static - read comments
-	let minWidth : CGFloat = 1000
+	let minWidth : CGFloat = 750
 	let minHeight : CGFloat = 700
-	let maxWidth : CGFloat = 1000
+	let maxWidth : CGFloat = 750
 	let maxHeight : CGFloat = 700
 }
 
 struct ContentView: View {
-	@State private var statusInfo: StatusInfo = StatusInfo()
+	@ObservedObject private var statusInfo: StatusInfo = StatusInfo()
+	@ObservedObject var badge: BadgeInfo
+	
+//	let timer = Timer.publish(every: 5, on: .main, in: .common).autoconnect()
 	
 	var body: some View {
+
 		Group() {
 			Spacer(minLength: 20.0)
 			VStack {
-				TitleText(text: "System Information")
-				VStack(spacing: 10) {
+				TitleText(text: badge.name)
+				VStack(spacing: 5) {
 					ScrollView {
 						ForEach(statusInfo.statusEntries.indices) { i in
 							VStack {
@@ -42,10 +52,11 @@ struct ContentView: View {
 			   minHeight: windowSize().minHeight,
 			   maxHeight: windowSize().maxHeight)
     }
+	
 }
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        ContentView(badge: BadgeInfo())
     }
 }

@@ -15,6 +15,7 @@
 		DC62B83D27AA385A00F2F109 /* StatusInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC62B83C27AA385A00F2F109 /* StatusInfo.swift */; };
 		DC62B83E27AA387D00F2F109 /* TextViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC62B83527AA354B00F2F109 /* TextViews.swift */; };
 		DC62B83F27AA388100F2F109 /* StatusEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC62B83627AA354B00F2F109 /* StatusEntryView.swift */; };
+		DCADF32E27E6C42500B5D18F /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCADF32D27E6C42500B5D18F /* PreferencesView.swift */; };
 		DCD1EF3F27B21E8000385E55 /* enhanced_dot_digital-7.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DCD1EF3E27B21D3300385E55 /* enhanced_dot_digital-7.ttf */; };
 		DCD1EF4027B21E8000385E55 /* GAS_____.TTF in Resources */ = {isa = PBXBuildFile; fileRef = DCD1EF3C27B21C0500385E55 /* GAS_____.TTF */; };
 		DCD1EF4127B21E8000385E55 /* minisystem.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DCD1EF3A27B21C0500385E55 /* minisystem.ttf */; };
@@ -34,6 +35,7 @@
 		DC62B83727AA354B00F2F109 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		DC62B83827AA355F00F2F109 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DC62B83C27AA385A00F2F109 /* StatusInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusInfo.swift; sourceTree = "<group>"; };
+		DCADF32D27E6C42500B5D18F /* PreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesView.swift; sourceTree = "<group>"; };
 		DCD1EF3927B21C0500385E55 /* MobileFont.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = MobileFont.ttf; sourceTree = "<group>"; };
 		DCD1EF3A27B21C0500385E55 /* minisystem.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = minisystem.ttf; sourceTree = "<group>"; };
 		DCD1EF3B27B21C0500385E55 /* led_counter-7_italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "led_counter-7_italic.ttf"; sourceTree = "<group>"; };
@@ -100,6 +102,7 @@
 				DC62B83627AA354B00F2F109 /* StatusEntryView.swift */,
 				DC62B83727AA354B00F2F109 /* ContentView.swift */,
 				DC62B83527AA354B00F2F109 /* TextViews.swift */,
+				DCADF32D27E6C42500B5D18F /* PreferencesView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -153,7 +156,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1320;
-				LastUpgradeCheck = 1320;
+				LastUpgradeCheck = 1330;
 				TargetAttributes = {
 					DC62B82127AA353400F2F109 = {
 						CreatedOnToolsVersion = 13.2.1;
@@ -207,6 +210,7 @@
 				DC62B83F27AA388100F2F109 /* StatusEntryView.swift in Sources */,
 				DC62B83E27AA387D00F2F109 /* TextViews.swift in Sources */,
 				DC62B83D27AA385A00F2F109 /* StatusInfo.swift in Sources */,
+				DCADF32E27E6C42500B5D18F /* PreferencesView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -335,6 +339,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = SystemBadge/SystemBadge.entitlements;
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -366,6 +371,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = SystemBadge/SystemBadge.entitlements;
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;

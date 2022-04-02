@@ -14,9 +14,9 @@ func bashCmd(cmd: String) -> String {
 	return execCommand(command: "bash", args: ["-c", cmd])
 }
 
-func zshCmd(cmd: String) -> String {
-	return execCommand(command: "zsh", args: ["-c", cmd])
-}
+//func zshCmd(cmd: String) -> String {
+//	return execCommand(command: "zsh", args: ["-c", cmd])
+//}
 
 func execCommand(command: String, args: [String]) -> String {
 	if !command.hasPrefix("/") {
@@ -34,18 +34,19 @@ func execCommand(command: String, args: [String]) -> String {
 	}
 }
 
-
-
 struct StatusEntry {
 	let name: String
 	var commandValue: () -> String
 	let icon: Image
 }
 
-struct StatusInfo {
-	var statusEntries: [StatusEntry] = []
-	
+class StatusInfo: ObservableObject {
+	@Published var statusEntries: [StatusEntry] = []
 	init() {
+		self.refresh()
+	}
+	
+	func refresh() {
 		//Host.current().localizedName
 		statusEntries.append(StatusEntry(
 			name: "Short Hostname",
@@ -84,12 +85,15 @@ struct StatusInfo {
 				let command = "ifconfig \(name) | grep inet | grep -v inet6 | cut -d' ' -f2 | tail -n1"  // This works
 //				let command = "ipconfig getifaddr \(name)"  // This does not work
 				let ip_addr = bashCmd(cmd: command)
+				
+				let iconName = (localizedName as String == "Wi-Fi") ? "wifi": "network"
+				
 				if ip_addr != "" {
 					statusEntries.append(StatusEntry(name: "\(localizedName) (\(name))",
 													 commandValue: { ()-> String in return "\(ip_addr)"
 																	.trimmingCharacters(in: .whitespacesAndNewlines)
 																   },
-													 icon: Image(systemName: "network")
+													 icon: Image(systemName: iconName )
 													))
 				}
 			}
@@ -109,33 +113,34 @@ struct StatusInfo {
 		statusEntries.append(StatusEntry(
 			name: "Public IP Address",
 			commandValue: { ()-> String in
-				let command = "curl ipecho.net/plain ; echo"
+				let command = "curl --silent ipecho.net/plain ; echo"
 				return bashCmd(cmd: command)
 					.trimmingCharacters(in: .whitespacesAndNewlines)
 			},
 			icon: Image(systemName: "network")
 		))
 		
+//		if (showCpu) {
+			statusEntries.append(StatusEntry(
+				name: "CPU Type",
+				commandValue: { ()-> String in
+					let command = "sysctl -n machdep.cpu.brand_string |awk '$1=$1' | sed 's/([A-Z]{1,2})//g'"
+					return bashCmd(cmd: command)
+						.trimmingCharacters(in: .whitespacesAndNewlines)
+				},
+				icon: Image(systemName: "cpu")
+			))
 		
-		statusEntries.append(StatusEntry(
-			name: "CPU Type",
-			commandValue: { ()-> String in
-				let command = "sysctl -n machdep.cpu.brand_string |awk '$1=$1' | sed 's/([A-Z]{1,2})//g'"
-				return bashCmd(cmd: command)
-					.trimmingCharacters(in: .whitespacesAndNewlines)
-			},
-			icon: Image(systemName: "cpu")
-		))
-		
-		statusEntries.append(StatusEntry(
-			name: "CPU cores/threads",
-			commandValue: { ()-> String in
-				let command = "echo `sysctl -n hw.physicalcpu` '/' `sysctl -n hw.logicalcpu`"
-				return bashCmd(cmd: command)
-					.trimmingCharacters(in: .whitespacesAndNewlines)
-			},
-			icon: Image(systemName: "cpu")
-		))
+			statusEntries.append(StatusEntry(
+				name: "CPU cores/threads",
+				commandValue: { ()-> String in
+					let command = "echo `sysctl -n hw.physicalcpu` '/' `sysctl -n hw.logicalcpu`"
+					return bashCmd(cmd: command)
+						.trimmingCharacters(in: .whitespacesAndNewlines)
+				},
+				icon: Image(systemName: "cpu")
+			))
+//	 	}
 		
 		//"$(( $(sysctl -n hw.memsize) / 1024 ** 3  )) GB"
 		statusEntries.append(StatusEntry(

@@ -17,29 +17,20 @@ struct StatusEntryView: View {
 		HStack {
 			icon
 				.frame(width: 35.0, height: 35.0, alignment: .leading)
-//				.opacity(0.4)
-				.foregroundColor(.blue)
+				.font(.title)
+				.foregroundColor(.yellow)
 			Text(name)
 				.font(.body)
 				.foregroundColor(Color.white)
-//				.bold()
-				.frame(width: 250.0, alignment: .trailing)
-//				.background(
-//					Capsule()
-//						.fill(.black)
-						
-//				)
+				.bold()
+				.frame(width: 220.0, alignment: .trailing)
 			Divider()
 			Text(value)
-				.font(Font.custom("Enhanced Dot Digital-7", size: 18))
+				.font(.custom("EnhancedDotDigital-7", size: 18))
 				.foregroundColor(Color("MetricColor"))
-//				.bold()
-				.frame(width: 500.0, alignment: .leading)
-//				.background(
-//					Rectangle()
-//						.fill(.gray)
-//				)
-//
+				.bold()
+				.italic()
+				.frame(width: 450.0, alignment: .leading)
 		}
         
     }

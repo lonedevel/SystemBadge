@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleURLTypes</key>
+	<array/>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Fonts/MobileFont.ttf</string>
+		<string>Fonts/enhanced_dot_digital-7.ttf</string>
+	</array>
+	<key>ATSApplicationFontsPath</key>
+	<string>.</string>
+	<key>UTImportedTypeDeclarations</key>
+	<array/>
+</dict>
+</plist>
