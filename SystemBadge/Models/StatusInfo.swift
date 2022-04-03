@@ -34,8 +34,10 @@ func execCommand(command: String, args: [String]) -> String {
 	}
 }
 
-struct StatusEntry {
+struct StatusEntry: Identifiable {
+	var id: Int
 	let name: String
+	let category: String
 	var commandValue: () -> String
 	let icon: Image
 }
@@ -49,7 +51,9 @@ class StatusInfo: ObservableObject {
 	func refresh() {
 		//Host.current().localizedName
 		statusEntries.append(StatusEntry(
+			id: statusEntries.count,
 			name: "Short Hostname",
+			category: "General",
 			commandValue: { ()-> String in
 				return Host.current().localizedName!
 					.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -58,7 +62,9 @@ class StatusInfo: ObservableObject {
 		))
 		
 		statusEntries.append(StatusEntry(
+			id: statusEntries.count,
 			name: "FQDN Hostname",
+			category: "General",
 			commandValue: { ()-> String in
 				let command = "hostname -f"
 				return bashCmd(cmd: command)
@@ -69,7 +75,9 @@ class StatusInfo: ObservableObject {
 
 		
 		statusEntries.append(StatusEntry(
+			id: statusEntries.count,
 			name: "Username",
+			category: "General",
 			commandValue: { ()-> String in
 				return "\(NSUserName()) ( \(NSFullUserName()) )"
 					.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -80,16 +88,16 @@ class StatusInfo: ObservableObject {
 		// Loop through each network interface and extract the BSD and localized name then gather its IPv4 IP Address
 		for interface in SCNetworkInterfaceCopyAll() as NSArray {
 			if let name = SCNetworkInterfaceGetBSDName(interface as! SCNetworkInterface),
-//			   let type = SCNetworkInterfaceGetInterfaceType(interface as! SCNetworkInterface),
 			   let localizedName = SCNetworkInterfaceGetLocalizedDisplayName(interface as! SCNetworkInterface){
 				let command = "ifconfig \(name) | grep inet | grep -v inet6 | cut -d' ' -f2 | tail -n1"  // This works
-//				let command = "ipconfig getifaddr \(name)"  // This does not work
 				let ip_addr = bashCmd(cmd: command)
 				
 				let iconName = (localizedName as String == "Wi-Fi") ? "wifi": "network"
 				
 				if ip_addr != "" {
-					statusEntries.append(StatusEntry(name: "\(localizedName) (\(name))",
+					statusEntries.append(StatusEntry(id: statusEntries.count,
+													 name: "\(localizedName) (\(name))",
+													 category: "Network",
 													 commandValue: { ()-> String in return "\(ip_addr)"
 																	.trimmingCharacters(in: .whitespacesAndNewlines)
 																   },
@@ -111,7 +119,9 @@ class StatusInfo: ObservableObject {
 //
 			
 		statusEntries.append(StatusEntry(
+			id: statusEntries.count,
 			name: "Public IP Address",
+			category: "Network",
 			commandValue: { ()-> String in
 				let command = "curl --silent ipecho.net/plain ; echo"
 				return bashCmd(cmd: command)
@@ -122,7 +132,9 @@ class StatusInfo: ObservableObject {
 		
 //		if (showCpu) {
 			statusEntries.append(StatusEntry(
+				id: statusEntries.count,
 				name: "CPU Type",
+				category: "System",
 				commandValue: { ()-> String in
 					let command = "sysctl -n machdep.cpu.brand_string |awk '$1=$1' | sed 's/([A-Z]{1,2})//g'"
 					return bashCmd(cmd: command)
@@ -132,7 +144,9 @@ class StatusInfo: ObservableObject {
 			))
 		
 			statusEntries.append(StatusEntry(
+				id: statusEntries.count,
 				name: "CPU cores/threads",
+				category: "System",
 				commandValue: { ()-> String in
 					let command = "echo `sysctl -n hw.physicalcpu` '/' `sysctl -n hw.logicalcpu`"
 					return bashCmd(cmd: command)
@@ -144,7 +158,9 @@ class StatusInfo: ObservableObject {
 		
 		//"$(( $(sysctl -n hw.memsize) / 1024 ** 3  )) GB"
 		statusEntries.append(StatusEntry(
+			id: statusEntries.count,
 			name: "RAM",
+			category: "System",
 			commandValue: { ()-> String in
 				let command = "expr `sysctl -n hw.memsize` / 1073741824"
 				let result = "\(bashCmd(cmd: command).trimmingCharacters(in: .whitespacesAndNewlines)) GB"
@@ -154,7 +170,9 @@ class StatusInfo: ObservableObject {
 		))
 		
 		statusEntries.append(StatusEntry(
+			id: statusEntries.count,
 			name: "Operating System",
+			category: "System",
 			commandValue: { ()-> String in
 				let command = "echo `sw_vers -productName` `sw_vers -productVersion`"
 				return bashCmd(cmd: command)
@@ -164,7 +182,9 @@ class StatusInfo: ObservableObject {
 		))
 		
 		statusEntries.append(StatusEntry(
+			id: statusEntries.count,
 			name: "System Uptime",
+			category: "General",
 			commandValue: { ()-> String in
 				return ProcessInfo.processInfo.systemUptime.stringFromTimeInterval()
 					.trimmingCharacters(in: .whitespacesAndNewlines)
