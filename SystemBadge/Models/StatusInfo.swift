@@ -59,7 +59,7 @@ class StatusInfo: ObservableObject {
 					.trimmingCharacters(in: .whitespacesAndNewlines)
 			},
 			icon: Image(systemName: "desktopcomputer.and.arrow.down")
-		))
+		))*
 		
 		statusEntries.append(StatusEntry(
 			id: statusEntries.count,
@@ -106,18 +106,7 @@ class StatusInfo: ObservableObject {
 				}
 			}
 		}
-		
-//		statusEntries.append(StatusEntry(
-//			name: "IP Address",
-//			commandValue: { ()-> String in
-//				let command = "ifconfig | grep inet | grep -v inet6 | cut -d' ' -f2 | tail -n1"
-//				return bashCmd(cmd: command)
-//					.trimmingCharacters(in: .whitespacesAndNewlines)
-//			},
-//			icon: Image(systemName: "network")
-//		))
-//
-			
+					
 		statusEntries.append(StatusEntry(
 			id: statusEntries.count,
 			name: "Public IP Address",

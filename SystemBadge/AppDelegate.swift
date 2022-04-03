@@ -48,8 +48,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
 		// Create the popover
 		self.popover = NSPopover()
-		self.popover.contentSize = NSSize(width: 1000, height: 700)
+		self.popover.contentSize = NSSize(width: 750, height: 250)
+		
 		self.popover.behavior = .transient
+//		self.popover.animates = false
 		self.popover.contentViewController = NSHostingController(rootView: contentView)
 		
 		self.statusBarItem = NSStatusBar.system.statusItem(withLength: CGFloat(NSStatusItem.variableLength))
@@ -67,14 +69,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 	
 	// Create the status item
 	@objc func togglePopover(_ sender: AnyObject?) {
-//		_ = ContentView(badge: badgeInfo)
+		_ = ContentView(badge: badgeInfo)
 
 		 if let button = self.statusBarItem.button {
 			  if self.popover.isShown {
 				   self.popover.performClose(sender)
 			  } else {
 				  badgeInfo.name = "System Badge"
-				  self.popover.show(relativeTo: button.bounds, of: button, preferredEdge: NSRectEdge.minY)
+				  self.popover.show(relativeTo: button.frame, of: button, preferredEdge: NSRectEdge.minY)
 			  }
 		 }
 	}
