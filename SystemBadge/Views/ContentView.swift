@@ -23,48 +23,54 @@ struct windowSize {
 
 struct ContentView: View {
 	let statusInfo = StatusInfo()
-		
+	@AppStorage("backgroundColor") private var backgroundColor = Color("BackgroundColor")
+
 	@ObservedObject var badge: BadgeInfo
 	
 	var body: some View {
-		TabView {
-			VStack(spacing: 5) {
-				ScrollView {
-					ForEach(statusInfo.statusEntries.filter{$0.category.contains("General")}) { (item) in
-						VStack {
-							StatusEntryView(name: item.name, value: item.commandValue(), icon: item.icon)
+		ZStack {
+			$backgroundColor.wrappedValue.ignoresSafeArea()
+			TabView {
+				VStack(spacing: 5) {
+					ScrollView {
+						ForEach(statusInfo.statusEntries.filter{$0.category.contains("General")}) { (item) in
+							VStack {
+								StatusEntryView(name: item.name, value: item.commandValue(), icon: item.icon)
+							}
 						}
 					}
 				}
-			}
-			.tabItem{
-				Label("General", systemImage: "paintpalette")
-			}
-			VStack(spacing: 5) {
-				ScrollView {
-					ForEach(statusInfo.statusEntries.filter{$0.category.contains("Network")}) { (item) in
-						VStack {
-							StatusEntryView(name: item.name, value: item.commandValue(), icon: item.icon)
+				.tabItem{
+					Label("General", systemImage: "paintpalette")
+				}
+				VStack(spacing: 5) {
+					ScrollView {
+						ForEach(statusInfo.statusEntries.filter{$0.category.contains("Network")}) { (item) in
+							VStack {
+								StatusEntryView(name: item.name, value: item.commandValue(), icon: item.icon)
+							}
 						}
 					}
 				}
-			}
-			.tabItem{
-					Label("Network", systemImage: "gear")
-			}
-			VStack(spacing: 5) {
-				ScrollView {
-					ForEach(statusInfo.statusEntries.filter{$0.category.contains("System")}) { (item) in
-						VStack {
-							StatusEntryView(name: item.name, value: item.commandValue(), icon: item.icon)
+				.tabItem{
+						Label("Network", systemImage: "gear")
+				}
+				VStack(spacing: 5) {
+					ScrollView {
+						ForEach(statusInfo.statusEntries.filter{$0.category.contains("System")}) { (item) in
+							VStack {
+								StatusEntryView(name: item.name, value: item.commandValue(), icon: item.icon)
+							}
 						}
 					}
 				}
-			}
-			.tabItem{
-				Label("System", systemImage: "gear")
+				.tabItem{
+					Label("System", systemImage: "gear")
+				}
 			}
 		}
+		
+
 		.padding(20)
 //		.frame(width: 375, height: 150)
 		.frame(minWidth: windowSize().minWidth,

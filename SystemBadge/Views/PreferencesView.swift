@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct PreferencesView: View {
+	@State private var metricFont: NSFont = NSFont.systemFont(ofSize: 24)
+
     var body: some View {
 		TabView {
 			AppearanceSettingsView()
@@ -20,26 +22,42 @@ struct PreferencesView: View {
 				}
 		}
 		.padding(20)
-		.frame(width: 375, height: 150)
+		.frame(width: 375, height: 300)
 	}
 }
 
 struct AppearanceSettingsView: View {
-	@AppStorage("showCpu") private var showCpu = true
+	@AppStorage("metricColor") private var metricColor = Color("MetricColor")
+	@AppStorage("labelColor") private var labelColor = Color("LabelColor")
+	@AppStorage("backgroundColor") private var backgroundColor = Color("BackgroundColor")
+	@State private var metricFont: NSFont = NSFont.systemFont(ofSize: 24)
 
+//	@AppStorage("metricFont") private var metricFont = Font("MetricFont")
+//	var metricFont: Font
+	
 	var body: some View {
 		Form {
-			Text("Appearance Settings")
-				.font(.title)
-			Toggle("Show CPU", isOn: $showCpu)
+			FontPicker("Metric Font", selection: $metricFont)
+			Text("selected font name \(metricFont.displayName ?? "no font" )")
+			ColorPicker("Metric Color", selection: $metricColor)
+			ColorPicker("Label Color", selection: $labelColor)
+			ColorPicker("Background Color", selection: $backgroundColor)
 		}
 	}
 }
 
 struct ContentSettingsView: View {
+	@AppStorage("showCpu") private var showCpu = true
+	@AppStorage("showPublicInternet") private var showPublicInternet = true
+	
 	var body: some View {
-		Text("Content Settings")
-			.font(.title)
+		Form {
+			Toggle("Show CPU", isOn: $showCpu)
+			Toggle("Show Public Internet", isOn: $showPublicInternet)
+//			Toggle("Show CPU", isOn: $showCpu)
+//			Toggle("Show CPU", isOn: $showCpu)
+			
+		}
 	}
 }
 

@@ -59,7 +59,7 @@ class StatusInfo: ObservableObject {
 					.trimmingCharacters(in: .whitespacesAndNewlines)
 			},
 			icon: Image(systemName: "desktopcomputer.and.arrow.down")
-		))*
+		))
 		
 		statusEntries.append(StatusEntry(
 			id: statusEntries.count,

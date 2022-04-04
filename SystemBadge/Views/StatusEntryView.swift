@@ -12,6 +12,8 @@ struct StatusEntryView: View {
 	let name: String
 	let value: String
 	let icon: Image
+	@AppStorage("metricColor") private var metricColor = Color("MetricColor")
+	@AppStorage("labelColor") private var labelColor = Color("LabelColor")
 	
     var body: some View {
 		HStack {
@@ -21,13 +23,14 @@ struct StatusEntryView: View {
 				.foregroundColor(.yellow)
 			Text(name)
 				.font(.body)
-				.foregroundColor(Color.white)
+				.foregroundColor($labelColor.wrappedValue)
 				.bold()
 				.frame(width: 220.0, alignment: .trailing)
 			Divider()
 			Text(value)
 				.font(.custom("EnhancedDotDigital-7", size: 18))
-				.foregroundColor(Color("MetricColor"))
+//				.foregroundColor(Color("MetricColor"))
+				.foregroundColor($metricColor.wrappedValue)
 				.bold()
 				.italic()
 				.frame(width: 450.0, alignment: .leading)
