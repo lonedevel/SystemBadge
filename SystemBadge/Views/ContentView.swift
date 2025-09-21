@@ -15,9 +15,9 @@ class BadgeInfo: ObservableObject {
 }
 struct windowSize {
 	// change let to static - read comments
-	let minWidth : CGFloat = 750
-	let minHeight : CGFloat = 250
-	let maxWidth : CGFloat = 750
+	let minWidth : CGFloat = 650
+	let minHeight : CGFloat = 200
+	let maxWidth : CGFloat = 620
 	let maxHeight : CGFloat = 250
 }
 

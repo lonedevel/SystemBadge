@@ -20,13 +20,14 @@ struct SystemBadgeApp: App {
         WindowGroup {
 			ContentView(badge: badgeInfo)
         }
+		.windowLevel(.floating)
 		Settings {
 			PreferencesView()
 		}
     }
 }
 
-extension Color: RawRepresentable {
+extension Color: @retroactive RawRepresentable {
 
 	public init?(rawValue: String) {
 		
@@ -35,10 +36,10 @@ extension Color: RawRepresentable {
 			return
 		}
 		
-		do{
-			let color = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? NSColor ?? .black
+		do {
+			let color = try NSKeyedUnarchiver.unarchivedObject(ofClass: NSColor.self, from: data) ?? .black
 			self = Color(color)
-		}catch{
+		} catch {
 			self = .black
 		}
 		

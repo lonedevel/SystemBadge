@@ -25,7 +25,7 @@ struct StatusEntryView: View {
 				.font(.body)
 				.foregroundColor($labelColor.wrappedValue)
 				.bold()
-				.frame(width: 220.0, alignment: .trailing)
+				.frame(width: 250.0, alignment: .trailing)
 			Divider()
 			Text(value)
 				.font(.custom("EnhancedDotDigital-7", size: 18))

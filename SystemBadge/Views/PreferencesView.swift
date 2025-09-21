@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct PreferencesView: View {
-	@State private var metricFont: NSFont = NSFont.systemFont(ofSize: 24)
+	@State private var metricFont: NSFont = NSFont.systemFont(ofSize: 12)
 
     var body: some View {
 		TabView {
