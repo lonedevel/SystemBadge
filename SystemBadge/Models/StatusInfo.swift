@@ -52,6 +52,25 @@ class StatusInfo: ObservableObject {
 		//Host.current().localizedName
 		statusEntries.append(StatusEntry(
 			id: statusEntries.count,
+			name: "Current Date",
+			category: "General",
+			commandValue: { ()-> String in
+				return Date().formatted(date: .complete, time: .omitted)
+			},
+			icon: Image(systemName: "calendar")
+		))
+		
+		statusEntries.append(StatusEntry(
+			id: statusEntries.count,
+			name: "Current Time",
+			category: "General",
+			commandValue: { ()-> String in
+				return Date().formatted(date: .omitted, time: .complete)
+			},
+			icon: Image(systemName: "clock")
+		))
+		statusEntries.append(StatusEntry(
+			id: statusEntries.count,
 			name: "Short Hostname",
 			category: "General",
 			commandValue: { ()-> String in
@@ -64,7 +83,7 @@ class StatusInfo: ObservableObject {
 		statusEntries.append(StatusEntry(
 			id: statusEntries.count,
 			name: "FQDN Hostname",
-			category: "General",
+			category: "Network",
 			commandValue: { ()-> String in
 				let command = "hostname -f"
 				return bashCmd(cmd: command)
@@ -180,6 +199,61 @@ class StatusInfo: ObservableObject {
 			},
 			icon: Image(systemName: "deskclock")
 		))
+		
+		statusEntries.append(StatusEntry(
+			id: statusEntries.count,
+			name: "Battery Health",
+			category: "Power",
+			commandValue: { ()-> String in
+				return getBatteryHealth() ?? "Unknown"
+			},
+			icon: Image(systemName: "bolt")
+		))
+		
+		statusEntries.append(StatusEntry(
+			id: statusEntries.count,
+			name: "Battery Percentage",
+			category: "Power",
+			commandValue: { () -> String in
+				if let pct = getBatteryPercentageHealth() {
+					// If value is 0-100, format as integer percent; if 0-1, convert to 0-100
+					let value: Double = pct <= 1.0 ? pct * 100.0 : pct
+					if value.rounded(.towardZero) == value { // already integer-like
+						return String(format: "%.0f%%", value)
+					} else {
+						return String(format: "%.1f%%", value)
+					}
+				} else {
+					return "Unknown"
+				}
+			},
+			icon: Image("battery.75percent")
+		))
+		
+		statusEntries.append(StatusEntry(
+			id: statusEntries.count,
+			name: "Used | Available | Total Capacity (root)",
+			category: "Storage",
+			commandValue: { ()-> String in
+				let rootDiskInfo = getDiskSpaceInfo(for: URL(fileURLWithPath: "/"))
+				let rootDiskInfoString = "\(rootDiskInfo.usedCapacity) | \(rootDiskInfo.availableCapacity) | \(rootDiskInfo.totalCapacity)"
+				return rootDiskInfoString
+			},
+			icon: Image(systemName: "cylinder.fill")
+		))
+		
+		statusEntries.append(StatusEntry(
+			id: statusEntries.count,
+			name: "Used | Available | Total Capacity (backup)",
+			category: "Storage",
+			commandValue: { ()-> String in
+				let rootDiskInfo = getDiskSpaceInfo(for: URL(fileURLWithPath: "/Volumes/Backup-1"))
+				let rootDiskInfoString = "\(rootDiskInfo.usedCapacity) | \(rootDiskInfo.availableCapacity) | \(rootDiskInfo.totalCapacity)"
+				return rootDiskInfoString
+			},
+			icon: Image(systemName: "cylinder.fill")
+		))
+
 	}
 }
 
@@ -195,3 +269,4 @@ extension TimeInterval {
 		return String(format: "%02d d %0.2d h %0.2d m %0.2d s",days,hours,minutes,seconds)
 	}
 }
+

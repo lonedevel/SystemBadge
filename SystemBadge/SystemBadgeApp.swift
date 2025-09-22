@@ -36,10 +36,10 @@ extension Color: @retroactive RawRepresentable {
 			return
 		}
 		
-		do {
+		do{
 			let color = try NSKeyedUnarchiver.unarchivedObject(ofClass: NSColor.self, from: data) ?? .black
 			self = Color(color)
-		} catch {
+		}catch{
 			self = .black
 		}
 		
@@ -60,4 +60,3 @@ extension Color: @retroactive RawRepresentable {
 	}
 
 }
-
