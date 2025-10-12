@@ -24,10 +24,7 @@ struct windowSize {
 }
 
 struct ContentView: View {
-	@State private var currentTime = Date()
-	let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
-	
-	@State private var statusInfo = StatusInfo()
+	@StateObject private var statusInfo = StatusInfo()
 	@AppStorage("backgroundColor") private var backgroundColor = Color("BackgroundColor")
 	@ObservedObject var badge: BadgeInfo
 	
@@ -37,9 +34,9 @@ struct ContentView: View {
 			TabView {
 				VStack(spacing: 5) {
 					ScrollView {
-						ForEach(statusInfo.statusEntries.filter{$0.category.contains("General")}) { (item) in
+						ForEach(statusInfo.statusEntries.filter{ $0.category.contains("General") }) { (item) in
 							VStack {
-								StatusEntryView(name: item.name, value: item.commandValue(), icon: item.icon)
+								StatusEntryView(name: item.name, value: item.value, icon: item.icon)
 							}
 						}
 					}
@@ -49,9 +46,9 @@ struct ContentView: View {
 				}
 				VStack(spacing: 5) {
 					ScrollView {
-						ForEach(statusInfo.statusEntries.filter{$0.category.contains("Network")}) { (item) in
+						ForEach(statusInfo.statusEntries.filter{ $0.category.contains("Network") }) { (item) in
 							VStack {
-								StatusEntryView(name: item.name, value: item.commandValue(), icon: item.icon)
+								StatusEntryView(name: item.name, value: item.value, icon: item.icon)
 							}
 						}
 					}
@@ -61,9 +58,9 @@ struct ContentView: View {
 				}
 				VStack(spacing: 5) {
 					ScrollView {
-						ForEach(statusInfo.statusEntries.filter{$0.category.contains("System")}) { (item) in
+						ForEach(statusInfo.statusEntries.filter{ $0.category.contains("System") }) { (item) in
 							VStack {
-								StatusEntryView(name: item.name, value: item.commandValue(), icon: item.icon)
+								StatusEntryView(name: item.name, value: item.value, icon: item.icon)
 							}
 						}
 					}
@@ -73,9 +70,9 @@ struct ContentView: View {
 				}
 				VStack(spacing: 5) {
 					ScrollView {
-						ForEach(statusInfo.statusEntries.filter{$0.category.contains("Power")}) { (item) in
+						ForEach(statusInfo.statusEntries.filter{ $0.category.contains("Power") }) { (item) in
 							VStack {
-								StatusEntryView(name: item.name, value: item.commandValue(), icon: item.icon)
+								StatusEntryView(name: item.name, value: item.value, icon: item.icon)
 							}
 						}
 					}
@@ -85,9 +82,9 @@ struct ContentView: View {
 				}
 				VStack(spacing: 5) {
 					ScrollView {
-						ForEach(statusInfo.statusEntries.filter{$0.category.contains("Storage")}) { (item) in
+						ForEach(statusInfo.statusEntries.filter{ $0.category.contains("Storage") }) { (item) in
 							VStack {
-								StatusEntryView(name: item.name, value: item.commandValue(), icon: item.icon)
+								StatusEntryView(name: item.name, value: item.value, icon: item.icon)
 							}
 						}
 					}
@@ -96,9 +93,6 @@ struct ContentView: View {
 					Label("Storage", systemImage: "gear")
 				}
 			}
-		}
-		.onReceive(timer) { _ in
-			statusInfo = StatusInfo()
 		}
 		.padding(20)
 		.frame(minWidth: windowSize.minWidth,
