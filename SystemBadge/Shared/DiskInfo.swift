@@ -12,6 +12,11 @@ func getDiskSpaceInfo(for path: URL)-> (totalCapacity: String, usedCapacity: Str
 	var usedCapacity = "n/a"
 	var availableCapacity = "n/a"
 	
+	// Validate that the path exists before querying
+	guard FileManager.default.fileExists(atPath: path.path) else {
+		print("Path does not exist: \(path.path)")
+		return (totalCapacity, usedCapacity, availableCapacity)
+	}
 
 	do {
 		let resourceValues = try path.resourceValues(forKeys: [.volumeTotalCapacityKey, .volumeAvailableCapacityForImportantUsageKey])
@@ -31,11 +36,6 @@ func getDiskSpaceInfo(for path: URL)-> (totalCapacity: String, usedCapacity: Str
 		availableCapacity = formatter.string(fromByteCount: available)
 		usedCapacity = formatter.string(fromByteCount: used)
 
-//		print("--- Disk Space Information for \(path.path) ---")
-//		print("Total Capacity: \(formatter.string(fromByteCount: totalCapacity))")
-//		print("Available Capacity: \(formatter.string(fromByteCount: availableCapacity))")
-//		print("Used Capacity: \(formatter.string(fromByteCount: usedCapacity))")
-//		
 		return (totalCapacity, usedCapacity, availableCapacity)
 	} catch {
 		print("Error retrieving disk space information: \(error.localizedDescription)")

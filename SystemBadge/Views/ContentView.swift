@@ -54,7 +54,7 @@ struct ContentView: View {
 					}
 				}
 				.tabItem{
-					Label("Network", systemImage: "gear")
+					Label("Network", systemImage: "network")
 				}
 				VStack(spacing: 5) {
 					ScrollView {
@@ -66,7 +66,7 @@ struct ContentView: View {
 					}
 				}
 				.tabItem{
-					Label("System", systemImage: "gear")
+					Label("System", systemImage: "desktopcomputer")
 				}
 				VStack(spacing: 5) {
 					ScrollView {
@@ -78,7 +78,7 @@ struct ContentView: View {
 					}
 				}
 				.tabItem{
-					Label("Power", systemImage: "gear")
+					Label("Power", systemImage: "bolt.fill")
 				}
 				VStack(spacing: 5) {
 					ScrollView {
@@ -90,7 +90,7 @@ struct ContentView: View {
 					}
 				}
 				.tabItem{
-					Label("Storage", systemImage: "gear")
+					Label("Storage", systemImage: "internaldrive")
 				}
 			}
 		}

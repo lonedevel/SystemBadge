@@ -18,6 +18,9 @@
 		DC62B83F27AA388100F2F109 /* StatusEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC62B83627AA354B00F2F109 /* StatusEntryView.swift */; };
 		DC69C4ED2E8CD15B0057FA9D /* BatteryBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC69C4EC2E8CD15B0057FA9D /* BatteryBarView.swift */; };
 		DCADF32E27E6C42500B5D18F /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCADF32D27E6C42500B5D18F /* PreferencesView.swift */; };
+		DCAEAB392F416CFB007F8767 /* FIXES_APPLIED.md in Resources */ = {isa = PBXBuildFile; fileRef = DCAEAB382F416CFB007F8767 /* FIXES_APPLIED.md */; };
+		DCAEAB3B2F416D53007F8767 /* IMPLEMENTATION_SUMMARY.md in Resources */ = {isa = PBXBuildFile; fileRef = DCAEAB3A2F416D53007F8767 /* IMPLEMENTATION_SUMMARY.md */; };
+		DCAEAB3D2F416E16007F8767 /* HOTFIX_SHELLCMD.md in Resources */ = {isa = PBXBuildFile; fileRef = DCAEAB3C2F416E16007F8767 /* HOTFIX_SHELLCMD.md */; };
 		DCD1EF3F27B21E8000385E55 /* enhanced_dot_digital-7.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DCD1EF3E27B21D3300385E55 /* enhanced_dot_digital-7.ttf */; };
 		DCD1EF4027B21E8000385E55 /* GAS_____.TTF in Resources */ = {isa = PBXBuildFile; fileRef = DCD1EF3C27B21C0500385E55 /* GAS_____.TTF */; };
 		DCD1EF4127B21E8000385E55 /* minisystem.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DCD1EF3A27B21C0500385E55 /* minisystem.ttf */; };
@@ -40,6 +43,9 @@
 		DC62B83C27AA385A00F2F109 /* StatusInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusInfo.swift; sourceTree = "<group>"; };
 		DC69C4EC2E8CD15B0057FA9D /* BatteryBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryBarView.swift; sourceTree = "<group>"; };
 		DCADF32D27E6C42500B5D18F /* PreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesView.swift; sourceTree = "<group>"; };
+		DCAEAB382F416CFB007F8767 /* FIXES_APPLIED.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = FIXES_APPLIED.md; sourceTree = "<group>"; };
+		DCAEAB3A2F416D53007F8767 /* IMPLEMENTATION_SUMMARY.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = IMPLEMENTATION_SUMMARY.md; sourceTree = "<group>"; };
+		DCAEAB3C2F416E16007F8767 /* HOTFIX_SHELLCMD.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = HOTFIX_SHELLCMD.md; sourceTree = "<group>"; };
 		DCD1EF3927B21C0500385E55 /* MobileFont.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = MobileFont.ttf; sourceTree = "<group>"; };
 		DCD1EF3A27B21C0500385E55 /* minisystem.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = minisystem.ttf; sourceTree = "<group>"; };
 		DCD1EF3B27B21C0500385E55 /* led_counter-7_italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "led_counter-7_italic.ttf"; sourceTree = "<group>"; };
@@ -114,6 +120,8 @@
 				DCADF32D27E6C42500B5D18F /* PreferencesView.swift */,
 				DC0842A827FA479600999507 /* FontPicker.swift */,
 				DC69C4EC2E8CD15B0057FA9D /* BatteryBarView.swift */,
+				DCAEAB382F416CFB007F8767 /* FIXES_APPLIED.md */,
+				DCAEAB3A2F416D53007F8767 /* IMPLEMENTATION_SUMMARY.md */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -122,6 +130,7 @@
 			isa = PBXGroup;
 			children = (
 				DC62B83C27AA385A00F2F109 /* StatusInfo.swift */,
+				DCAEAB3C2F416E16007F8767 /* HOTFIX_SHELLCMD.md */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -201,10 +210,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				DCD1EF3F27B21E8000385E55 /* enhanced_dot_digital-7.ttf in Resources */,
+				DCAEAB3D2F416E16007F8767 /* HOTFIX_SHELLCMD.md in Resources */,
 				DCD1EF4427B21E8000385E55 /* led_counter-7_italic.ttf in Resources */,
 				DCD1EF4227B21E8000385E55 /* MobileFont.ttf in Resources */,
 				DC62B82D27AA353700F2F109 /* Preview Assets.xcassets in Resources */,
 				DCD1EF4127B21E8000385E55 /* minisystem.ttf in Resources */,
+				DCAEAB392F416CFB007F8767 /* FIXES_APPLIED.md in Resources */,
+				DCAEAB3B2F416D53007F8767 /* IMPLEMENTATION_SUMMARY.md in Resources */,
 				DCD1EF4327B21E8000385E55 /* led_counter-7.ttf in Resources */,
 				DCD1EF4027B21E8000385E55 /* GAS_____.TTF in Resources */,
 				DC62B82A27AA353700F2F109 /* Assets.xcassets in Resources */,

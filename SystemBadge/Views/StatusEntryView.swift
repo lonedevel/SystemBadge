@@ -25,7 +25,7 @@ struct StatusEntryView: View {
 				.foregroundColor(.yellow)
 			Text(name)
 				.font(.body)
-				.foregroundColor($labelColor.wrappedValue)
+				.foregroundColor(labelColor)
 				.bold()
 				.frame(width: 250.0, alignment: .trailing)
 			Divider()
@@ -34,15 +34,15 @@ struct StatusEntryView: View {
 					percentage: pct,
 					fontName: "EnhancedDotDigital-7",
 					fontSize: 18,
-					barForeground: $metricColor.wrappedValue,
-					barBackground: $labelColor.wrappedValue,
-					inverseLabelColor: $labelColor.wrappedValue
+					barForeground: metricColor,
+					barBackground: labelColor,
+					inverseLabelColor: labelColor
 				)
 				.frame(width: 450.0, alignment: .leading)
 			} else {
 				Text(value)
 					.font(.custom("EnhancedDotDigital-7", size: 18))
-					.foregroundColor($metricColor.wrappedValue)
+					.foregroundColor(metricColor)
 					.bold()
 					.italic()
 					.frame(width: 450.0, alignment: .leading)

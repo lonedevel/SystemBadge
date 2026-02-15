@@ -23,21 +23,25 @@ actor Shell {
 
         try process.run()
 
-        func terminateProcess() {
-            if process.isRunning {
-                process.terminate()
-                // If it doesn't terminate quickly, escalate
-                DispatchQueue.global().asyncAfter(deadline: .now() + 1) {
-                    guard process.isRunning else { return }
-                    process.interrupt()
-                    DispatchQueue.global().asyncAfter(deadline: .now() + 1) {
-                        guard process.isRunning else { return }
-                        #if canImport(Darwin)
-                        Darwin.kill(process.processIdentifier, SIGKILL)
-                        #endif
-                    }
-                }
-            }
+        /// Gracefully terminates the process with escalating signals
+        func terminateProcess() async {
+            guard process.isRunning else { return }
+            let pid = process.processIdentifier
+            
+            // Step 1: Try SIGTERM (graceful termination)
+            process.terminate()
+            try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
+            
+            // Step 2: If still running and PID matches, try SIGINT (interrupt)
+            guard process.isRunning, process.processIdentifier == pid else { return }
+            process.interrupt()
+            try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
+            
+            // Step 3: If still running and PID matches, use SIGKILL (force kill)
+            guard process.isRunning, process.processIdentifier == pid else { return }
+            #if canImport(Darwin)
+            Darwin.kill(pid, SIGKILL)
+            #endif
         }
 
         let runToCompletion: () async throws -> String = {
@@ -90,7 +94,7 @@ actor Shell {
                 return result
             } catch {
                 group.cancelAll()
-                terminateProcess()
+                await terminateProcess()
                 throw error
             }
         }
@@ -100,10 +104,10 @@ actor Shell {
 // Legacy sync wrappers (safe): return empty string on error instead of crashing the app
 private let shell = Shell()
 
+@available(*, deprecated, message: "Use shell.run() directly with async/await")
 func shellCmd(cmd: String, timeout: TimeInterval = 5) -> String {
-    // Prefer async usage; this sync wrapper is best-effort and should not be used from the main thread.
-    // It awaits using Task and blocks until completion via a semaphore to preserve existing call sites,
-    // but returns an empty string on error to avoid Objective-C exceptions.
+    // Legacy sync wrapper for backward compatibility
+    // This blocks the calling thread, so avoid using it when possible
     let sem = DispatchSemaphore(value: 0)
     var result = ""
     Task {
@@ -112,6 +116,36 @@ func shellCmd(cmd: String, timeout: TimeInterval = 5) -> String {
     }
     sem.wait()
     return result
+}
+
+// MARK: - Helper Functions
+
+/// Retrieves the public IP address with fallback services
+/// - Returns: Public IP address string, or "Unavailable" if all services fail
+func getPublicIPAddress() async -> String {
+    let services = [
+        "https://api.ipify.org",
+        "https://icanhazip.com",
+        "https://ipecho.net/plain"
+    ]
+    
+    for service in services {
+        do {
+            let result = try await shell.run("curl --silent --max-time 3 '\(service)'", timeout: 5)
+            let trimmed = result.trimmingCharacters(in: .whitespacesAndNewlines)
+            
+            // Validate it looks like an IP address (basic IPv4 regex)
+            if !trimmed.isEmpty,
+               trimmed.range(of: #"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"#, options: .regularExpression) != nil {
+                return trimmed
+            }
+        } catch {
+            // Try next service
+            continue
+        }
+    }
+    
+    return "Unavailable"
 }
 
 // MARK: - Status Model
@@ -133,6 +167,9 @@ struct StatusEntry: Identifiable {
 class StatusInfo: ObservableObject {
     @Published var statusEntries: [StatusEntry] = []
     private var timer: Timer?
+    
+    // Configurable settings
+    @AppStorage("backupVolumePath") private var backupVolumePath = "/Volumes/Backup-1"
 
     private var tick: Int = 0
 
@@ -193,8 +230,12 @@ class StatusInfo: ObservableObject {
             category: "Network",
             cadence: .slow,
             commandValue: {
-                let output = shellCmd(cmd: "hostname -f").trimmingCharacters(in: .whitespacesAndNewlines)
-                return output
+                do {
+                    let output = try await shell.run("hostname -f", timeout: 5)
+                    return output.trimmingCharacters(in: .whitespacesAndNewlines)
+                } catch {
+                    return ""
+                }
             },
             icon: Image(systemName: "desktopcomputer.and.arrow.down")
         ))
@@ -223,8 +264,13 @@ class StatusInfo: ObservableObject {
                     category: "Network",
                     cadence: cadenceValue,
                     commandValue: {
-                        let cmd = "ifconfig \(bsd) | grep inet | grep -v inet6 | cut -d' ' -f2 | tail -n1"
-                        return shellCmd(cmd: cmd).trimmingCharacters(in: .whitespacesAndNewlines)
+                        do {
+                            let cmd = "ifconfig \(bsd) | grep inet | grep -v inet6 | cut -d' ' -f2 | tail -n1"
+                            let result = try await shell.run(cmd, timeout: 5)
+                            return result.trimmingCharacters(in: .whitespacesAndNewlines)
+                        } catch {
+                            return ""
+                        }
                     },
                     icon: Image(systemName: iconName)
                 ))
@@ -237,8 +283,7 @@ class StatusInfo: ObservableObject {
             category: "Network",
             cadence: .slow,
             commandValue: {
-                let cmd = "curl --silent ipecho.net/plain ; echo"
-                return shellCmd(cmd: cmd).trimmingCharacters(in: .whitespacesAndNewlines)
+                return await getPublicIPAddress()
             },
             icon: Image(systemName: "network")
         ))
@@ -249,8 +294,13 @@ class StatusInfo: ObservableObject {
             category: "System",
             cadence: .slow,
             commandValue: {
-                let cmd = "sysctl -n machdep.cpu.brand_string |awk '$1=$1' | sed 's/([A-Z]{1,2})//g'"
-                return shellCmd(cmd: cmd).trimmingCharacters(in: .whitespacesAndNewlines)
+                do {
+                    let cmd = "sysctl -n machdep.cpu.brand_string |awk '$1=$1' | sed 's/([A-Z]{1,2})//g'"
+                    let result = try await shell.run(cmd, timeout: 5)
+                    return result.trimmingCharacters(in: .whitespacesAndNewlines)
+                } catch {
+                    return ""
+                }
             },
             icon: Image(systemName: "cpu")
         ))
@@ -261,8 +311,13 @@ class StatusInfo: ObservableObject {
             category: "System",
             cadence: .slow,
             commandValue: {
-                let cmd = "echo `sysctl -n hw.physicalcpu` '/' `sysctl -n hw.logicalcpu`"
-                return shellCmd(cmd: cmd).trimmingCharacters(in: .whitespacesAndNewlines)
+                do {
+                    let cmd = "echo `sysctl -n hw.physicalcpu` '/' `sysctl -n hw.logicalcpu`"
+                    let result = try await shell.run(cmd, timeout: 5)
+                    return result.trimmingCharacters(in: .whitespacesAndNewlines)
+                } catch {
+                    return ""
+                }
             },
             icon: Image(systemName: "cpu")
         ))
@@ -273,9 +328,14 @@ class StatusInfo: ObservableObject {
             category: "System",
             cadence: .slow,
             commandValue: {
-                let cmd = "expr `sysctl -n hw.memsize` / 1073741824"
-                let val = shellCmd(cmd: cmd).trimmingCharacters(in: .whitespacesAndNewlines)
-                return val.isEmpty ? "" : "\(val) GB"
+                do {
+                    let cmd = "expr `sysctl -n hw.memsize` / 1073741824"
+                    let result = try await shell.run(cmd, timeout: 5)
+                    let val = result.trimmingCharacters(in: .whitespacesAndNewlines)
+                    return val.isEmpty ? "" : "\(val) GB"
+                } catch {
+                    return ""
+                }
             },
             icon: Image(systemName: "memorychip")
         ))
@@ -286,8 +346,13 @@ class StatusInfo: ObservableObject {
             category: "System",
             cadence: .slow,
             commandValue: {
-                let cmd = "echo `sw_vers -productName` `sw_vers -productVersion`"
-                return shellCmd(cmd: cmd).trimmingCharacters(in: .whitespacesAndNewlines)
+                do {
+                    let cmd = "echo `sw_vers -productName` `sw_vers -productVersion`"
+                    let result = try await shell.run(cmd, timeout: 5)
+                    return result.trimmingCharacters(in: .whitespacesAndNewlines)
+                } catch {
+                    return ""
+                }
             },
             icon: Image(systemName: "macwindow.on.rectangle")
         ))
@@ -347,11 +412,20 @@ class StatusInfo: ObservableObject {
             name: "Used | Available | Total Capacity (backup)",
             category: "Storage",
             cadence: .slow,
-            commandValue: {
-                let info = getDiskSpaceInfo(for: URL(fileURLWithPath: "/Volumes/Backup-1"))
+            commandValue: { [weak self] in
+                guard let self = self else { return "n/a | n/a | n/a" }
+                let volumePath = self.backupVolumePath
+                
+                // Check if the volume exists
+                let fileManager = FileManager.default
+                guard fileManager.fileExists(atPath: volumePath) else {
+                    return "Volume not mounted"
+                }
+                
+                let info = getDiskSpaceInfo(for: URL(fileURLWithPath: volumePath))
                 return "\(info.usedCapacity) | \(info.availableCapacity) | \(info.totalCapacity)"
             },
-            icon: Image(systemName: "cylinder.fill")
+            icon: Image(systemName: "externaldrive.fill")
         ))
         
         Task { await self.populateInitialValues() }
@@ -405,11 +479,18 @@ class StatusInfo: ObservableObject {
 extension TimeInterval {
     func stringFromTimeInterval() -> String {
         let time = NSInteger(self)
-        let seconds = time % 60
-        let minutes = (time / 60) % 60
-        let hours = (time / 3600) % 24
-        let days = (time / 84000)
-        return String(format: "%02d d %0.2d h %0.2d m %0.2d s", days, hours, minutes, seconds)
+        
+        // Constants for time calculations
+        let secondsPerMinute = 60
+        let secondsPerHour = 3600
+        let secondsPerDay = 86400
+        
+        let days = time / secondsPerDay
+        let hours = (time % secondsPerDay) / secondsPerHour
+        let minutes = (time % secondsPerHour) / secondsPerMinute
+        let seconds = time % secondsPerMinute
+        
+        return String(format: "%02dd %02dh %02dm %02ds", days, hours, minutes, seconds)
     }
 }
 

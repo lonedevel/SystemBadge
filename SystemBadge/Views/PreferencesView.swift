@@ -8,8 +8,6 @@
 import SwiftUI
 
 struct PreferencesView: View {
-	@State private var metricFont: NSFont = NSFont.systemFont(ofSize: 12)
-
     var body: some View {
 		TabView {
 			AppearanceSettingsView()
@@ -49,14 +47,17 @@ struct AppearanceSettingsView: View {
 struct ContentSettingsView: View {
 	@AppStorage("showCpu") private var showCpu = true
 	@AppStorage("showPublicInternet") private var showPublicInternet = true
+	@AppStorage("backupVolumePath") private var backupVolumePath = "/Volumes/Backup-1"
 	
 	var body: some View {
 		Form {
 			Toggle("Show CPU", isOn: $showCpu)
 			Toggle("Show Public Internet", isOn: $showPublicInternet)
-//			Toggle("Show CPU", isOn: $showCpu)
-//			Toggle("Show CPU", isOn: $showCpu)
 			
+			Section("Storage") {
+				TextField("Backup Volume Path", text: $backupVolumePath)
+					.help("Path to your backup volume (e.g., /Volumes/Backup-1)")
+			}
 		}
 	}
 }
