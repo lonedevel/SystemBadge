@@ -189,26 +189,19 @@ func getIconForInterface(localizedName: String, bsdName: String) -> String {
         return "wifi"
     }
     
-    // Thunderbolt Ethernet - check for "Thunderbolt" in name first
+    // Thunderbolt interfaces
     if localizedName.contains("Thunderbolt") {
-        // If it's specifically Thunderbolt Ethernet/Bridge, use thunderbolt with network indicator
-        if localizedName.contains("Ethernet") || localizedName.contains("Bridge") {
-            return "cable.connector.horizontal" // Thunderbolt Ethernet adapter
-        }
         return "thunderbolt"
     }
     
-    // USB Ethernet adapters
+    // USB interfaces
     if localizedName.contains("USB") {
-        if localizedName.contains("Ethernet") {
-            return "cable.connector" // USB Ethernet adapter
-        }
         return "cable.connector"
     }
     
     // Bluetooth PAN
     if localizedName.contains("Bluetooth") {
-        return "personalhotspot"
+        return "bluetooth"
     }
     
     // Bridge interfaces
@@ -216,13 +209,49 @@ func getIconForInterface(localizedName: String, bsdName: String) -> String {
         return "network.badge.shield.half.filled"
     }
     
-    // Built-in Ethernet (usually en0 on desktops, or en1/en2 on laptops)
+    // Default to ethernet for en0, en1, etc.
     if bsdName.hasPrefix("en") {
         return "cable.connector.horizontal"
     }
     
     // Generic network for everything else
     return "network"
+}
+
+/// Determines the appropriate SF Symbol icon for a storage volume
+/// - Parameters:
+///   - volumeURL: The URL of the mounted volume
+///   - isInternal: Whether the volume is an internal drive
+///   - isRemovable: Whether the volume is removable
+///   - isLocal: Whether the volume is local (not network)
+/// - Returns: SF Symbol name for the volume type
+func getIconForVolume(volumeURL: URL, isInternal: Bool, isRemovable: Bool, isLocal: Bool) -> String {
+    // Network volumes (SMB, AFP, NFS)
+    if !isLocal {
+        return "server.rack"
+    }
+    
+    // Check if it's a disk image
+    let path = volumeURL.path
+    if path.contains("/Volumes/") {
+        // Common disk image patterns
+        if path.hasSuffix(".dmg") || path.hasSuffix(".sparsebundle") {
+            return "opticaldiscdrive"
+        }
+    }
+    
+    // Removable drives (USB, Thunderbolt external drives)
+    if isRemovable {
+        return "externaldrive"
+    }
+    
+    // Internal drives (system SSD/HDD)
+    if isInternal {
+        return "internaldrive"
+    }
+    
+    // Default to external drive for everything else
+    return "externaldrive"
 }
 
 // MARK: - Status Model
@@ -244,9 +273,7 @@ struct StatusEntry: Identifiable {
 class StatusInfo: ObservableObject {
     @Published var statusEntries: [StatusEntry] = []
     private var timer: Timer?
-    
-    // Configurable settings
-    @AppStorage("backupVolumePath") private var backupVolumePath = "/Volumes/Backup-1"
+    private var lastVolumeCount: Int = 0
 
     private var tick: Int = 0
 
@@ -483,38 +510,75 @@ class StatusInfo: ObservableObject {
             icon: Image("battery.75percent")
         ))
 
-        statusEntries.append(StatusEntry(
-            id: statusEntries.count,
-            name: "Used | Available | Total Capacity (root)",
-            category: "Storage",
-            cadence: .slow,
-            commandValue: {
-                let rootDiskInfo = getDiskSpaceInfo(for: URL(fileURLWithPath: "/"))
-                return "\(rootDiskInfo.usedCapacity) | \(rootDiskInfo.availableCapacity) | \(rootDiskInfo.totalCapacity)"
-            },
-            icon: Image(systemName: "cylinder.fill")
-        ))
-
-        statusEntries.append(StatusEntry(
-            id: statusEntries.count,
-            name: "Used | Available | Total Capacity (backup)",
-            category: "Storage",
-            cadence: .slow,
-            commandValue: { [weak self] in
-                guard let self = self else { return "n/a | n/a | n/a" }
-                let volumePath = self.backupVolumePath
-                
-                // Check if the volume exists
-                let fileManager = FileManager.default
-                guard fileManager.fileExists(atPath: volumePath) else {
-                    return "Volume not mounted"
+        // Storage - dynamically discover all mounted volumes
+        let volumeKeys: [URLResourceKey] = [
+            .volumeNameKey,
+            .volumeIsInternalKey,
+            .volumeIsLocalKey,
+            .volumeIsRemovableKey,
+            .volumeIsEjectableKey,
+            .volumeIsReadOnlyKey
+        ]
+        
+        if let volumes = FileManager.default.mountedVolumeURLs(
+            includingResourceValuesForKeys: volumeKeys,
+            options: [.skipHiddenVolumes]
+        ) {
+            // Update volume count for change detection
+            lastVolumeCount = volumes.count
+            
+            for volumeURL in volumes {
+                // Get volume properties
+                guard let resourceValues = try? volumeURL.resourceValues(forKeys: Set(volumeKeys)) else {
+                    continue
                 }
                 
-                let info = getDiskSpaceInfo(for: URL(fileURLWithPath: volumePath))
-                return "\(info.usedCapacity) | \(info.availableCapacity) | \(info.totalCapacity)"
-            },
-            icon: Image(systemName: "externaldrive.fill")
-        ))
+                let volumeName = resourceValues.volumeName ?? "Unknown Volume"
+                let isInternal = resourceValues.volumeIsInternal ?? false
+                let isRemovable = resourceValues.volumeIsRemovable ?? false
+                let isLocal = resourceValues.volumeIsLocal ?? true
+                let isReadOnly = resourceValues.volumeIsReadOnly ?? false
+                
+                // Skip certain problematic volumes
+                // - APFS "Data" volumes (shown as separate but part of system volume)
+                // - Read-only volumes that may cause CacheDelete errors
+                // - VM.app volumes and other special system volumes
+                if volumeName == "Data" || 
+                   volumeName.contains("VM") ||
+                   volumeName.contains("Preboot") ||
+                   volumeName.contains("Recovery") {
+                    continue
+                }
+                
+                // Test if we can actually get volume info (prevents CacheDelete errors)
+                let testInfo = getDiskSpaceInfo(for: volumeURL)
+                if testInfo.totalCapacity == "n/a" {
+                    // Skip volumes we can't read capacity for
+                    continue
+                }
+                
+                // Determine appropriate icon
+                let iconName = getIconForVolume(
+                    volumeURL: volumeURL,
+                    isInternal: isInternal,
+                    isRemovable: isRemovable,
+                    isLocal: isLocal
+                )
+                
+                // Create storage entry for this volume
+                statusEntries.append(StatusEntry(
+                    id: statusEntries.count,
+                    name: "\(volumeName)",
+                    category: "Storage",
+                    cadence: .slow,
+                    commandValue: {
+                        let info = getDiskSpaceInfo(for: volumeURL)
+                        return "\(info.usedCapacity) | \(info.availableCapacity) | \(info.totalCapacity)"
+                    },
+                    icon: Image(systemName: iconName)
+                ))
+            }
+        }
         
         Task { await self.populateInitialValues() }
     }
@@ -538,6 +602,12 @@ class StatusInfo: ObservableObject {
         if statusEntries.isEmpty { 
             await buildEntries()
         }
+        
+        // Check if volumes have changed (every 10 seconds)
+        if tick % RefreshCadence.medium.rawValue == 0 {
+            await checkVolumeChanges()
+        }
+        
         var updated = self.statusEntries
         var changed = false
         for idx in updated.indices {
@@ -552,6 +622,20 @@ class StatusInfo: ObservableObject {
         }
         if changed {
             self.statusEntries = updated
+        }
+    }
+    
+    /// Checks if the number of mounted volumes has changed and rebuilds entries if needed
+    private func checkVolumeChanges() async {
+        let currentVolumeCount = FileManager.default.mountedVolumeURLs(
+            includingResourceValuesForKeys: nil,
+            options: [.skipHiddenVolumes]
+        )?.count ?? 0
+        
+        // If volume count changed, rebuild all entries
+        if currentVolumeCount != lastVolumeCount {
+            lastVolumeCount = currentVolumeCount
+            await buildEntries()
         }
     }
 

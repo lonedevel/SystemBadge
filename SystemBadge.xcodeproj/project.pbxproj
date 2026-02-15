@@ -24,6 +24,7 @@
 		DCAEAB3F2F4173A4007F8767 /* FIX_1_BATTERY_GRAPH.md in Resources */ = {isa = PBXBuildFile; fileRef = DCAEAB3E2F4173A4007F8767 /* FIX_1_BATTERY_GRAPH.md */; };
 		DCAEAB412F4175B6007F8767 /* FIX_2_NETWORK_FILTERING.md in Resources */ = {isa = PBXBuildFile; fileRef = DCAEAB402F4175B6007F8767 /* FIX_2_NETWORK_FILTERING.md */; };
 		DCAEAB432F4178A2007F8767 /* FIX_2_NETWORK_FILTERING 2.md in Resources */ = {isa = PBXBuildFile; fileRef = DCAEAB422F4178A2007F8767 /* FIX_2_NETWORK_FILTERING 2.md */; };
+		DCAEAB452F417A21007F8767 /* FIX_3_STORAGE_VOLUMES.md in Resources */ = {isa = PBXBuildFile; fileRef = DCAEAB442F417A21007F8767 /* FIX_3_STORAGE_VOLUMES.md */; };
 		DCD1EF3F27B21E8000385E55 /* enhanced_dot_digital-7.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DCD1EF3E27B21D3300385E55 /* enhanced_dot_digital-7.ttf */; };
 		DCD1EF4027B21E8000385E55 /* GAS_____.TTF in Resources */ = {isa = PBXBuildFile; fileRef = DCD1EF3C27B21C0500385E55 /* GAS_____.TTF */; };
 		DCD1EF4127B21E8000385E55 /* minisystem.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DCD1EF3A27B21C0500385E55 /* minisystem.ttf */; };
@@ -52,6 +53,7 @@
 		DCAEAB3E2F4173A4007F8767 /* FIX_1_BATTERY_GRAPH.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = FIX_1_BATTERY_GRAPH.md; sourceTree = "<group>"; };
 		DCAEAB402F4175B6007F8767 /* FIX_2_NETWORK_FILTERING.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = FIX_2_NETWORK_FILTERING.md; sourceTree = "<group>"; };
 		DCAEAB422F4178A2007F8767 /* FIX_2_NETWORK_FILTERING 2.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "FIX_2_NETWORK_FILTERING 2.md"; sourceTree = "<group>"; };
+		DCAEAB442F417A21007F8767 /* FIX_3_STORAGE_VOLUMES.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = FIX_3_STORAGE_VOLUMES.md; sourceTree = "<group>"; };
 		DCD1EF3927B21C0500385E55 /* MobileFont.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = MobileFont.ttf; sourceTree = "<group>"; };
 		DCD1EF3A27B21C0500385E55 /* minisystem.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = minisystem.ttf; sourceTree = "<group>"; };
 		DCD1EF3B27B21C0500385E55 /* led_counter-7_italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "led_counter-7_italic.ttf"; sourceTree = "<group>"; };
@@ -140,6 +142,7 @@
 				DCAEAB3C2F416E16007F8767 /* HOTFIX_SHELLCMD.md */,
 				DCAEAB402F4175B6007F8767 /* FIX_2_NETWORK_FILTERING.md */,
 				DCAEAB422F4178A2007F8767 /* FIX_2_NETWORK_FILTERING 2.md */,
+				DCAEAB442F417A21007F8767 /* FIX_3_STORAGE_VOLUMES.md */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -226,6 +229,7 @@
 				DC62B82D27AA353700F2F109 /* Preview Assets.xcassets in Resources */,
 				DCD1EF4127B21E8000385E55 /* minisystem.ttf in Resources */,
 				DCAEAB392F416CFB007F8767 /* FIXES_APPLIED.md in Resources */,
+				DCAEAB452F417A21007F8767 /* FIX_3_STORAGE_VOLUMES.md in Resources */,
 				DCAEAB412F4175B6007F8767 /* FIX_2_NETWORK_FILTERING.md in Resources */,
 				DCAEAB3B2F416D53007F8767 /* IMPLEMENTATION_SUMMARY.md in Resources */,
 				DCD1EF4327B21E8000385E55 /* led_counter-7.ttf in Resources */,

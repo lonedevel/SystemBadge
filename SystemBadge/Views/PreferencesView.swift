@@ -47,7 +47,6 @@ struct AppearanceSettingsView: View {
 struct ContentSettingsView: View {
 	@AppStorage("showCpu") private var showCpu = true
 	@AppStorage("showPublicInternet") private var showPublicInternet = true
-	@AppStorage("backupVolumePath") private var backupVolumePath = "/Volumes/Backup-1"
 	
 	var body: some View {
 		Form {
@@ -55,8 +54,9 @@ struct ContentSettingsView: View {
 			Toggle("Show Public Internet", isOn: $showPublicInternet)
 			
 			Section("Storage") {
-				TextField("Backup Volume Path", text: $backupVolumePath)
-					.help("Path to your backup volume (e.g., /Volumes/Backup-1)")
+				Text("All mounted volumes are automatically detected and displayed.")
+					.font(.caption)
+					.foregroundColor(.secondary)
 			}
 		}
 	}

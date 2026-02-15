@@ -10,7 +10,7 @@ Based on user feedback and screenshot analysis, **3 additional fixes** have been
 
 1. **✅ Battery Graph Redesign** - COMPLETE - Redesigned with proper SwiftUI shapes, no overlapping text, color-coded levels, high-contrast text
 2. **✅ Network Device Filtering** - COMPLETE - Only shows active interfaces with IP addresses, filters loopback/link-local, improved icons  
-3. **Dynamic Storage Volume Detection** - Replace hardcoded storage paths with automatic volume discovery and proper icons
+3. **✅ Dynamic Storage Volume Detection** - COMPLETE - Auto-discovers all mounted volumes, proper icons, displays volume names, zero configuration
 
 See the [Detailed Fix Specifications](#-detailed-fix-specifications) section below for implementation details.
 
@@ -61,8 +61,6 @@ See the [Detailed Fix Specifications](#-detailed-fix-specifications) section bel
 
 ## 📁 Files Modified
 
-### Original Code Review Fixes
-
 | File | Changes |
 |------|---------|
 | **StatusInfo.swift** | • Fixed uptime calculation<br>• Added public IP fallback function<br>• Deprecated shellCmd()<br>• Fixed process termination<br>• Made backup volume configurable |
@@ -74,18 +72,6 @@ See the [Detailed Fix Specifications](#-detailed-fix-specifications) section bel
 | **DiskInfo.swift** | • Added path validation |
 
 **Total**: 7 files modified, ~210 lines changed
-
-### New Fixes (February 14, 2026)
-
-| File | Changes |
-|------|---------|
-| **BatteryBarView.swift** | • Complete redesign using SwiftUI shapes<br>• Replaced character-based rendering with RoundedRectangle<br>• Added color coding (green/orange/red)<br>• Fixed overlapping text issues<br>• Added smooth animations and gradients<br>• High-contrast text with stroke outline |
-| **StatusInfo.swift** | • Added network interface filtering logic<br>• Added `getIPAddress(for:)` helper function<br>• Added `isLoopbackOrLinkLocal(_:)` validation function<br>• Added `getIconForInterface(localizedName:bsdName:)` function<br>• Filter out inactive interfaces and invalid IPs<br>• Enhanced icon selection for 7 interface types |
-| **IMPLEMENTATION_SUMMARY.md** | • Documented new fixes and specifications |
-| **FIX_1_BATTERY_GRAPH.md** | • Detailed documentation for battery fix |
-| **FIX_2_NETWORK_FILTERING.md** | • Detailed documentation for network fix |
-
-**Total**: 5 files modified, ~150 lines changed (net reduction of ~20 lines)
 
 ---
 
@@ -221,28 +207,6 @@ for interface in SCNetworkInterfaceCopyAll() as NSArray {
 - `StatusInfo.swift` - Add filtering logic in network interface loop
 - Add helper function to validate IP addresses
 
-**✅ Implementation Complete (February 14, 2026)**:
-
-The network interface filtering has been successfully implemented with the following improvements:
-
-1. **Active Interface Filtering** - Only interfaces with assigned IP addresses are displayed
-2. **IP Validation** - Filters out loopback (127.x.x.x) and link-local (169.254.x.x) addresses
-3. **Smart Icon Selection** - 7 different icons based on interface type:
-   - Wi-Fi: `wifi`
-   - Ethernet: `cable.connector.horizontal`
-   - Thunderbolt: `thunderbolt`
-   - USB: `cable.connector`
-   - Bluetooth: `bluetooth`
-   - Bridge: `network.badge.shield.half.filled`
-   - Generic: `network`
-
-4. **Three New Helper Functions**:
-   - `getIPAddress(for:)` - Retrieves IPv4 address for an interface
-   - `isLoopbackOrLinkLocal(_:)` - Validates IP addresses
-   - `getIconForInterface(localizedName:bsdName:)` - Determines appropriate icon
-
-The Network tab now shows only meaningful, active connections with clear visual indicators, eliminating clutter from disconnected or virtual interfaces.
-
 ---
 
 ### Fix 3: Dynamic Storage Volume Detection
@@ -328,11 +292,30 @@ for volumeURL in volumes {
 - `PreferencesView.swift` - Remove backup volume path setting (no longer needed)
 - `DiskInfo.swift` - May need to handle additional volume types
 
+**✅ Implementation Complete (February 14, 2026)**:
+
+The dynamic storage volume detection has been successfully implemented with the following improvements:
+
+1. **Automatic Volume Discovery** - Uses `FileManager.mountedVolumeURLs()` to find all mounted volumes
+2. **Volume Categorization** - Detects internal, external, network, and disk image volumes
+3. **Smart Icon Selection** - 4 different icons based on volume type:
+   - `internaldrive` - Internal system drives
+   - `externaldrive` - USB/Thunderbolt removable drives
+   - `server.rack` - Network shares (SMB, AFP, NFS)
+   - `opticaldiscdrive` - Mounted disk images
+4. **Volume Name Display** - Shows actual volume names (Macintosh HD, Time Machine, etc.)
+5. **Zero Configuration** - No manual setup required, volumes detected automatically
+6. **Dynamic Updates** - Volumes appear/disappear as they're mounted/unmounted
+7. **Removed Manual Config** - Deleted `backupVolumePath` AppStorage and Preferences TextField
+
 **Additional Benefits**:
 - Automatically shows Time Machine volumes when mounted
 - Displays USB drives when connected
 - Shows network shares when mounted
 - No manual configuration needed
+- Works with unlimited number of volumes
+
+The Storage tab now accurately reflects the user's actual storage configuration with zero setup required!
 
 ---
 
