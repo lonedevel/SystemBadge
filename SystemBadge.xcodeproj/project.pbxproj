@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		DC0842A927FA479600999507 /* FontPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0842A827FA479600999507 /* FontPicker.swift */; };
+		DC0BCA2D2F42803100FE7E98 /* HOTFIX_CONSOLE_WARNINGS.md in Resources */ = {isa = PBXBuildFile; fileRef = DC0BCA2C2F42803100FE7E98 /* HOTFIX_CONSOLE_WARNINGS.md */; };
 		DC62B82627AA353400F2F109 /* SystemBadgeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC62B82527AA353400F2F109 /* SystemBadgeApp.swift */; };
 		DC62B82A27AA353700F2F109 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DC62B82927AA353700F2F109 /* Assets.xcassets */; };
 		DC62B82D27AA353700F2F109 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DC62B82C27AA353700F2F109 /* Preview Assets.xcassets */; };
@@ -28,6 +29,7 @@
 
 /* Begin PBXFileReference section */
 		DC0842A827FA479600999507 /* FontPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontPicker.swift; sourceTree = "<group>"; };
+		DC0BCA2C2F42803100FE7E98 /* HOTFIX_CONSOLE_WARNINGS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = HOTFIX_CONSOLE_WARNINGS.md; sourceTree = "<group>"; };
 		DC62B82227AA353400F2F109 /* SystemBadge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SystemBadge.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DC62B82527AA353400F2F109 /* SystemBadgeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemBadgeApp.swift; sourceTree = "<group>"; };
 		DC62B82927AA353700F2F109 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -124,6 +126,7 @@
 			isa = PBXGroup;
 			children = (
 				DC62B83C27AA385A00F2F109 /* StatusInfo.swift */,
+				DC0BCA2C2F42803100FE7E98 /* HOTFIX_CONSOLE_WARNINGS.md */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -173,7 +176,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1320;
-				LastUpgradeCheck = 2600;
+				LastUpgradeCheck = 2630;
 				TargetAttributes = {
 					DC62B82127AA353400F2F109 = {
 						CreatedOnToolsVersion = 13.2.1;
@@ -208,6 +211,7 @@
 				DCD1EF4227B21E8000385E55 /* MobileFont.ttf in Resources */,
 				DC62B82D27AA353700F2F109 /* Preview Assets.xcassets in Resources */,
 				DCD1EF4127B21E8000385E55 /* minisystem.ttf in Resources */,
+				DC0BCA2D2F42803100FE7E98 /* HOTFIX_CONSOLE_WARNINGS.md in Resources */,
 				DCD1EF4327B21E8000385E55 /* led_counter-7.ttf in Resources */,
 				DCD1EF4027B21E8000385E55 /* GAS_____.TTF in Resources */,
 				DC62B82A27AA353700F2F109 /* Assets.xcassets in Resources */,
@@ -240,6 +244,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
@@ -305,6 +310,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";

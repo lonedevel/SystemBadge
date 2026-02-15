@@ -204,7 +204,7 @@ func getIconForInterface(localizedName: String, bsdName: String) -> String {
     
     // Thunderbolt interfaces
     if localizedName.contains("Thunderbolt") {
-        return "thunderbolt"
+        return "bolt.fill"
     }
     
     // USB interfaces
@@ -522,7 +522,7 @@ class StatusInfo: ObservableObject {
                     return "Unknown"
                 }
             },
-            icon: Image("battery.75percent")
+            icon: Image(systemName: "battery.100percent")
         ))
 
         // Storage - dynamically discover all mounted volumes
@@ -532,7 +532,9 @@ class StatusInfo: ObservableObject {
             .volumeIsLocalKey,
             .volumeIsRemovableKey,
             .volumeIsEjectableKey,
-            .volumeIsReadOnlyKey
+            .volumeIsReadOnlyKey,
+            .volumeIsBrowsableKey,
+            .volumeSupportsVolumeSizesKey
         ]
         
         if let volumes = FileManager.default.mountedVolumeURLs(
@@ -552,23 +554,26 @@ class StatusInfo: ObservableObject {
                 let isInternal = resourceValues.volumeIsInternal ?? false
                 let isRemovable = resourceValues.volumeIsRemovable ?? false
                 let isLocal = resourceValues.volumeIsLocal ?? true
-                let _ = resourceValues.volumeIsReadOnly ?? false
+                let isReadOnly = resourceValues.volumeIsReadOnly ?? false
+                let isBrowsable = resourceValues.volumeIsBrowsable ?? true
+                let supportsVolumeSizes = resourceValues.volumeSupportsVolumeSizes ?? true
                 
-                // Skip certain problematic volumes
-                // - APFS "Data" volumes (shown as separate but part of system volume)
-                // - Read-only volumes that may cause CacheDelete errors
-                // - VM.app volumes and other special system volumes
-                if volumeName == "Data" || 
-                   volumeName.contains("VM") ||
-                   volumeName.contains("Preboot") ||
-                   volumeName.contains("Recovery") {
+                // Skip volumes that don't support capacity queries
+                // This catches backup drives, recovery partitions, and special volumes
+                guard supportsVolumeSizes else {
                     continue
                 }
                 
-                // Test if we can actually get volume info (prevents CacheDelete errors)
-                let testInfo = getDiskSpaceInfo(for: volumeURL)
-                if testInfo.totalCapacity == "n/a" {
-                    // Skip volumes we can't read capacity for
+                // Skip non-browsable volumes (system volumes, recovery partitions, etc.)
+                guard isBrowsable else {
+                    continue
+                }
+                
+                // Skip special APFS system volumes by name (these are always present)
+                if volumeName == "Data" || 
+                   volumeName == "Preboot" || 
+                   volumeName == "Recovery" ||
+                   volumeName == "VM" {
                     continue
                 }
                 
