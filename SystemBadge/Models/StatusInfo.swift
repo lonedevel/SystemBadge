@@ -148,6 +148,83 @@ func getPublicIPAddress() async -> String {
     return "Unavailable"
 }
 
+/// Retrieves the IPv4 address for a given network interface
+/// - Parameter interfaceName: BSD name of the interface (e.g., "en0")
+/// - Returns: IP address string, or empty string if not available
+func getIPAddress(for interfaceName: String) async -> String {
+    do {
+        let cmd = "ifconfig \(interfaceName) | grep 'inet ' | grep -v inet6 | awk '{print $2}' | head -n1"
+        let result = try await shell.run(cmd, timeout: 5)
+        return result.trimmingCharacters(in: .whitespacesAndNewlines)
+    } catch {
+        return ""
+    }
+}
+
+/// Checks if an IP address is loopback or link-local
+/// - Parameter ipAddress: The IP address to check
+/// - Returns: true if the address should be filtered out
+func isLoopbackOrLinkLocal(_ ipAddress: String) -> Bool {
+    // Filter out loopback (127.x.x.x)
+    if ipAddress.hasPrefix("127.") {
+        return true
+    }
+    
+    // Filter out link-local (169.254.x.x)
+    if ipAddress.hasPrefix("169.254.") {
+        return true
+    }
+    
+    return false
+}
+
+/// Determines the appropriate SF Symbol icon for a network interface
+/// - Parameters:
+///   - localizedName: The localized display name (e.g., "Wi-Fi", "Ethernet")
+///   - bsdName: The BSD device name (e.g., "en0", "en1")
+/// - Returns: SF Symbol name for the interface type
+func getIconForInterface(localizedName: String, bsdName: String) -> String {
+    // Wi-Fi interfaces
+    if localizedName.contains("Wi-Fi") || localizedName.contains("AirPort") {
+        return "wifi"
+    }
+    
+    // Thunderbolt Ethernet - check for "Thunderbolt" in name first
+    if localizedName.contains("Thunderbolt") {
+        // If it's specifically Thunderbolt Ethernet/Bridge, use thunderbolt with network indicator
+        if localizedName.contains("Ethernet") || localizedName.contains("Bridge") {
+            return "cable.connector.horizontal" // Thunderbolt Ethernet adapter
+        }
+        return "thunderbolt"
+    }
+    
+    // USB Ethernet adapters
+    if localizedName.contains("USB") {
+        if localizedName.contains("Ethernet") {
+            return "cable.connector" // USB Ethernet adapter
+        }
+        return "cable.connector"
+    }
+    
+    // Bluetooth PAN
+    if localizedName.contains("Bluetooth") {
+        return "personalhotspot"
+    }
+    
+    // Bridge interfaces
+    if bsdName.hasPrefix("bridge") {
+        return "network.badge.shield.half.filled"
+    }
+    
+    // Built-in Ethernet (usually en0 on desktops, or en1/en2 on laptops)
+    if bsdName.hasPrefix("en") {
+        return "cable.connector.horizontal"
+    }
+    
+    // Generic network for everything else
+    return "network"
+}
+
 // MARK: - Status Model
 struct StatusEntry: Identifiable {
     var id: Int
@@ -174,7 +251,9 @@ class StatusInfo: ObservableObject {
     private var tick: Int = 0
 
     init() {
-        buildEntries()
+        Task {
+            await buildEntries()
+        }
         startTimer()
     }
     
@@ -194,7 +273,7 @@ class StatusInfo: ObservableObject {
         }
     }
 
-    private func buildEntries() {
+	private func buildEntries() async {
         statusEntries = []
 
         statusEntries.append(StatusEntry(
@@ -249,13 +328,27 @@ class StatusInfo: ObservableObject {
             icon: Image(systemName: "person")
         ))
 
-        // Network interfaces
-        for interface in SCNetworkInterfaceCopyAll() as NSArray {
+        // Network interfaces - only show active interfaces with IP addresses
+        // First, collect all interfaces and check which ones have IPs
+        let allInterfaces = SCNetworkInterfaceCopyAll() as NSArray
+        
+        for interface in allInterfaces {
             if let name = SCNetworkInterfaceGetBSDName(interface as! SCNetworkInterface),
                let localizedName = SCNetworkInterfaceGetLocalizedDisplayName(interface as! SCNetworkInterface) {
                 let bsd = name as String
                 let loc = localizedName as String
-                let iconName = (loc == "Wi-Fi") ? "wifi" : "network"
+                
+                // Get IP address to check if interface is active
+                let ipAddress = await getIPAddress(for: bsd)
+                
+                // Skip interfaces without IP or with loopback/link-local addresses
+                guard !ipAddress.isEmpty,
+                      !isLoopbackOrLinkLocal(ipAddress) else {
+                    continue
+                }
+                
+                // Determine appropriate icon based on interface type
+                let iconName = getIconForInterface(localizedName: loc, bsdName: bsd)
                 let cadenceValue: RefreshCadence = (loc == "Wi-Fi") ? .medium : .slow
 
                 statusEntries.append(StatusEntry(
@@ -264,13 +357,8 @@ class StatusInfo: ObservableObject {
                     category: "Network",
                     cadence: cadenceValue,
                     commandValue: {
-                        do {
-                            let cmd = "ifconfig \(bsd) | grep inet | grep -v inet6 | cut -d' ' -f2 | tail -n1"
-                            let result = try await shell.run(cmd, timeout: 5)
-                            return result.trimmingCharacters(in: .whitespacesAndNewlines)
-                        } catch {
-                            return ""
-                        }
+                        let ip = await getIPAddress(for: bsd)
+                        return ip.isEmpty ? "No IP" : ip
                     },
                     icon: Image(systemName: iconName)
                 ))
@@ -435,7 +523,7 @@ class StatusInfo: ObservableObject {
     func refresh() async {
         // For now, entries compute their values lazily when invoked by the UI.
         // If you want to precompute and cache values, you could evaluate each commandValue here and publish a concrete list.
-        buildEntries()
+        await buildEntries()
     }
 
     private func shouldRefresh(entry: StatusEntry, atTick tick: Int) -> Bool {
@@ -447,7 +535,9 @@ class StatusInfo: ObservableObject {
     }
 
     private func refreshAccordingToCadence() async {
-        if statusEntries.isEmpty { buildEntries() }
+        if statusEntries.isEmpty { 
+            await buildEntries()
+        }
         var updated = self.statusEntries
         var changed = false
         for idx in updated.indices {

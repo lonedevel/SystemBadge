@@ -22,6 +22,8 @@
 		DCAEAB3B2F416D53007F8767 /* IMPLEMENTATION_SUMMARY.md in Resources */ = {isa = PBXBuildFile; fileRef = DCAEAB3A2F416D53007F8767 /* IMPLEMENTATION_SUMMARY.md */; };
 		DCAEAB3D2F416E16007F8767 /* HOTFIX_SHELLCMD.md in Resources */ = {isa = PBXBuildFile; fileRef = DCAEAB3C2F416E16007F8767 /* HOTFIX_SHELLCMD.md */; };
 		DCAEAB3F2F4173A4007F8767 /* FIX_1_BATTERY_GRAPH.md in Resources */ = {isa = PBXBuildFile; fileRef = DCAEAB3E2F4173A4007F8767 /* FIX_1_BATTERY_GRAPH.md */; };
+		DCAEAB412F4175B6007F8767 /* FIX_2_NETWORK_FILTERING.md in Resources */ = {isa = PBXBuildFile; fileRef = DCAEAB402F4175B6007F8767 /* FIX_2_NETWORK_FILTERING.md */; };
+		DCAEAB432F4178A2007F8767 /* FIX_2_NETWORK_FILTERING 2.md in Resources */ = {isa = PBXBuildFile; fileRef = DCAEAB422F4178A2007F8767 /* FIX_2_NETWORK_FILTERING 2.md */; };
 		DCD1EF3F27B21E8000385E55 /* enhanced_dot_digital-7.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DCD1EF3E27B21D3300385E55 /* enhanced_dot_digital-7.ttf */; };
 		DCD1EF4027B21E8000385E55 /* GAS_____.TTF in Resources */ = {isa = PBXBuildFile; fileRef = DCD1EF3C27B21C0500385E55 /* GAS_____.TTF */; };
 		DCD1EF4127B21E8000385E55 /* minisystem.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DCD1EF3A27B21C0500385E55 /* minisystem.ttf */; };
@@ -48,6 +50,8 @@
 		DCAEAB3A2F416D53007F8767 /* IMPLEMENTATION_SUMMARY.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = IMPLEMENTATION_SUMMARY.md; sourceTree = "<group>"; };
 		DCAEAB3C2F416E16007F8767 /* HOTFIX_SHELLCMD.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = HOTFIX_SHELLCMD.md; sourceTree = "<group>"; };
 		DCAEAB3E2F4173A4007F8767 /* FIX_1_BATTERY_GRAPH.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = FIX_1_BATTERY_GRAPH.md; sourceTree = "<group>"; };
+		DCAEAB402F4175B6007F8767 /* FIX_2_NETWORK_FILTERING.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = FIX_2_NETWORK_FILTERING.md; sourceTree = "<group>"; };
+		DCAEAB422F4178A2007F8767 /* FIX_2_NETWORK_FILTERING 2.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "FIX_2_NETWORK_FILTERING 2.md"; sourceTree = "<group>"; };
 		DCD1EF3927B21C0500385E55 /* MobileFont.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = MobileFont.ttf; sourceTree = "<group>"; };
 		DCD1EF3A27B21C0500385E55 /* minisystem.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = minisystem.ttf; sourceTree = "<group>"; };
 		DCD1EF3B27B21C0500385E55 /* led_counter-7_italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "led_counter-7_italic.ttf"; sourceTree = "<group>"; };
@@ -134,6 +138,8 @@
 			children = (
 				DC62B83C27AA385A00F2F109 /* StatusInfo.swift */,
 				DCAEAB3C2F416E16007F8767 /* HOTFIX_SHELLCMD.md */,
+				DCAEAB402F4175B6007F8767 /* FIX_2_NETWORK_FILTERING.md */,
+				DCAEAB422F4178A2007F8767 /* FIX_2_NETWORK_FILTERING 2.md */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -213,12 +219,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				DCD1EF3F27B21E8000385E55 /* enhanced_dot_digital-7.ttf in Resources */,
+				DCAEAB432F4178A2007F8767 /* FIX_2_NETWORK_FILTERING 2.md in Resources */,
 				DCAEAB3D2F416E16007F8767 /* HOTFIX_SHELLCMD.md in Resources */,
 				DCD1EF4427B21E8000385E55 /* led_counter-7_italic.ttf in Resources */,
 				DCD1EF4227B21E8000385E55 /* MobileFont.ttf in Resources */,
 				DC62B82D27AA353700F2F109 /* Preview Assets.xcassets in Resources */,
 				DCD1EF4127B21E8000385E55 /* minisystem.ttf in Resources */,
 				DCAEAB392F416CFB007F8767 /* FIXES_APPLIED.md in Resources */,
+				DCAEAB412F4175B6007F8767 /* FIX_2_NETWORK_FILTERING.md in Resources */,
 				DCAEAB3B2F416D53007F8767 /* IMPLEMENTATION_SUMMARY.md in Resources */,
 				DCD1EF4327B21E8000385E55 /* led_counter-7.ttf in Resources */,
 				DCD1EF4027B21E8000385E55 /* GAS_____.TTF in Resources */,

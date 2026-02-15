@@ -8,8 +8,8 @@ I've successfully implemented **12 major fixes** from the code review recommenda
 
 Based on user feedback and screenshot analysis, **3 additional fixes** have been identified and documented below:
 
-1. **✅ Battery Graph Redesign** - COMPLETE - Redesigned with proper SwiftUI shapes, no overlapping text, color-coded levels
-2. **Network Device Filtering** - Filter network interfaces to show only active devices with IP addresses
+1. **✅ Battery Graph Redesign** - COMPLETE - Redesigned with proper SwiftUI shapes, no overlapping text, color-coded levels, high-contrast text
+2. **✅ Network Device Filtering** - COMPLETE - Only shows active interfaces with IP addresses, filters loopback/link-local, improved icons  
 3. **Dynamic Storage Volume Detection** - Replace hardcoded storage paths with automatic volume discovery and proper icons
 
 See the [Detailed Fix Specifications](#-detailed-fix-specifications) section below for implementation details.
@@ -79,10 +79,13 @@ See the [Detailed Fix Specifications](#-detailed-fix-specifications) section bel
 
 | File | Changes |
 |------|---------|
-| **BatteryBarView.swift** | • Complete redesign using SwiftUI shapes<br>• Replaced character-based rendering with RoundedRectangle<br>• Added color coding (green/orange/red)<br>• Fixed overlapping text issues<br>• Added smooth animations and gradients |
+| **BatteryBarView.swift** | • Complete redesign using SwiftUI shapes<br>• Replaced character-based rendering with RoundedRectangle<br>• Added color coding (green/orange/red)<br>• Fixed overlapping text issues<br>• Added smooth animations and gradients<br>• High-contrast text with stroke outline |
+| **StatusInfo.swift** | • Added network interface filtering logic<br>• Added `getIPAddress(for:)` helper function<br>• Added `isLoopbackOrLinkLocal(_:)` validation function<br>• Added `getIconForInterface(localizedName:bsdName:)` function<br>• Filter out inactive interfaces and invalid IPs<br>• Enhanced icon selection for 7 interface types |
 | **IMPLEMENTATION_SUMMARY.md** | • Documented new fixes and specifications |
+| **FIX_1_BATTERY_GRAPH.md** | • Detailed documentation for battery fix |
+| **FIX_2_NETWORK_FILTERING.md** | • Detailed documentation for network fix |
 
-**Total**: 2 files modified, ~80 lines changed (net reduction of ~40 lines)
+**Total**: 5 files modified, ~150 lines changed (net reduction of ~20 lines)
 
 ---
 
@@ -174,23 +177,6 @@ These are enhancements that would further improve the codebase but aren't critic
 - `BatteryBarView.swift` - Complete redesign of the view
 - `StatusEntryView.swift` - May need layout adjustments
 
-**✅ Implementation Complete (February 14, 2026)**:
-
-The BatteryBarView has been completely redesigned with the following improvements:
-
-1. **Replaced character-based rendering** with proper SwiftUI shapes (`RoundedRectangle`)
-2. **Fixed overlapping text issue** by using `GeometryReader` for precise layout calculations
-3. **Added color coding** for battery levels:
-   - Green for >50%
-   - Orange for 20-50%
-   - Red for <20%
-4. **Smooth animations** when battery percentage changes
-5. **Gradient fill** for a modern, polished appearance
-6. **Text shadow** for better readability on all backgrounds
-7. **Input validation** to clamp percentage to 0-100 range
-
-The new implementation eliminates all the complex AttributedString manipulation and inverse color overlay logic that was causing rendering issues. The bar now uses a simple ZStack with proper layering, making it much more maintainable and visually clear.
-
 ---
 
 ### Fix 2: Network Device Filtering
@@ -234,6 +220,28 @@ for interface in SCNetworkInterfaceCopyAll() as NSArray {
 **Files to Modify**:
 - `StatusInfo.swift` - Add filtering logic in network interface loop
 - Add helper function to validate IP addresses
+
+**✅ Implementation Complete (February 14, 2026)**:
+
+The network interface filtering has been successfully implemented with the following improvements:
+
+1. **Active Interface Filtering** - Only interfaces with assigned IP addresses are displayed
+2. **IP Validation** - Filters out loopback (127.x.x.x) and link-local (169.254.x.x) addresses
+3. **Smart Icon Selection** - 7 different icons based on interface type:
+   - Wi-Fi: `wifi`
+   - Ethernet: `cable.connector.horizontal`
+   - Thunderbolt: `thunderbolt`
+   - USB: `cable.connector`
+   - Bluetooth: `bluetooth`
+   - Bridge: `network.badge.shield.half.filled`
+   - Generic: `network`
+
+4. **Three New Helper Functions**:
+   - `getIPAddress(for:)` - Retrieves IPv4 address for an interface
+   - `isLoopbackOrLinkLocal(_:)` - Validates IP addresses
+   - `getIconForInterface(localizedName:bsdName:)` - Determines appropriate icon
+
+The Network tab now shows only meaningful, active connections with clear visual indicators, eliminating clutter from disconnected or virtual interfaces.
 
 ---
 
