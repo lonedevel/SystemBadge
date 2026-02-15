@@ -1,19 +1,32 @@
 import SwiftUI
 
-/// A text-based linear graph for battery percentage using block characters and inverse color for the percent label.
+/// A modern battery percentage graph using SwiftUI shapes with proper layout and color coding.
 struct BatteryBarView: View {
     let percentage: Double // 0...100
-    let barWidth: Int
     let fontName: String
     let fontSize: CGFloat
     let barForeground: Color
     let barBackground: Color
     let inverseLabelColor: Color
     
+    // Computed properties for dynamic styling
+    private var fillColor: Color {
+        if percentage > 50 {
+            return .green
+        } else if percentage > 20 {
+            return .orange
+        } else {
+            return .red
+        }
+    }
+    
+    private var percentageText: String {
+        String(format: "%.0f%%", percentage)
+    }
+    
     init(percentage: Double, barWidth: Int = 20, fontName: String = "EnhancedDotDigital-7", fontSize: CGFloat = 18,
          barForeground: Color = .green, barBackground: Color = .gray, inverseLabelColor: Color = .black) {
-        self.percentage = percentage
-        self.barWidth = barWidth
+        self.percentage = max(0, min(100, percentage)) // Clamp to 0-100
         self.fontName = fontName
         self.fontSize = fontSize
         self.barForeground = barForeground
@@ -22,84 +35,102 @@ struct BatteryBarView: View {
     }
 
     var body: some View {
-        let filledBlocks = Int(round((percentage / 100.0) * Double(barWidth)))
-        let emptyBlocks = barWidth - filledBlocks
-        let bar = String(repeating: "█", count: filledBlocks) + String(repeating: "░", count: emptyBlocks)
-        // Center the percentage label inside the bar
-        let percentStr = String(format: "%g%%", percentage.rounded())
-        let barWithPercent = insertLabel(in: bar, label: percentStr)
-        
-        // Render the bar. The percent label in inverse color, rest uses the block color
-        Text(barWithPercent)
-            .font(.custom(fontName, size: fontSize))
-            .foregroundColor(barForeground)
-            .background(
-                Text(bar)
-                    .font(.custom(fontName, size: fontSize))
-                    .foregroundColor(barBackground)
-            )
-            .overlay(
-                inverseLabelView(in: bar, label: percentStr)
-            )
-    }
-    
-    /// Inserts the percent label into the bar string, centered.
-    private func insertLabel(in bar: String, label: String) -> AttributedString {
-        // Build the result by slicing the plain String to avoid AttributedString index APIs
-        let barCount = bar.count
-        let labelCount = label.count
-        let labelStart = max((barCount - labelCount) / 2, 0)
-
-        // Determine how many characters we can safely replace within the bar
-        let replaceCount = min(labelCount, max(barCount - labelStart, 0))
-
-        // Compute String indices safely
-        let safeStart = min(labelStart, barCount)
-        let startIdx = bar.index(bar.startIndex, offsetBy: safeStart)
-        let endIdx = bar.index(startIdx, offsetBy: replaceCount)
-
-        // Slice prefix and suffix from the bar
-        let prefix = String(bar[..<startIdx])
-        let suffix = String(bar[endIdx...])
-
-        // Truncate label to fit available space if needed
-        let labelPart = String(label.prefix(replaceCount))
-
-        // Concatenate and convert to AttributedString for the Text view
-        return AttributedString(prefix + labelPart + suffix)
-    }
-
-    /// Create a view that overlays the label with inverseLabelColor at the correct position.
-    @ViewBuilder
-    private func inverseLabelView(in bar: String, label: String) -> some View {
-        let barCount = bar.count
-        let labelCount = label.count
-        let labelStart = max((barCount - labelCount) / 2, 0)
-
-        HStack(spacing: 0) {
-            Text(String(bar.prefix(labelStart)))
-                .font(.custom(fontName, size: fontSize))
-                .hidden()
-            Text(label)
-                .font(.custom(fontName, size: fontSize))
-                .foregroundColor(inverseLabelColor)
-                .background(barForeground)
-            Text(String(bar.suffix(barCount - labelStart - labelCount)))
-                .font(.custom(fontName, size: fontSize))
-                .hidden()
+        GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                // Background bar (empty portion)
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(barBackground.opacity(0.3))
+                    .frame(width: geometry.size.width, height: 24)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 4)
+                            .stroke(barBackground.opacity(0.5), lineWidth: 1)
+                    )
+                
+                // Filled bar (battery level)
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(
+                        LinearGradient(
+                            gradient: Gradient(colors: [fillColor, fillColor.opacity(0.8)]),
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .frame(width: geometry.size.width * (percentage / 100.0), height: 24)
+                    .animation(.easeInOut(duration: 0.3), value: percentage)
+                
+                // Percentage text overlay with high contrast
+                ZStack {
+                    // Multiple shadow layers for strong outline effect
+                    ForEach(0..<8, id: \.self) { index in
+                        Text(percentageText)
+                            .font(.custom(fontName, size: fontSize))
+                            .fontWeight(.bold)
+                            .foregroundColor(.black)
+                            .offset(
+                                x: cos(Double(index) * .pi / 4.0) * 2,
+                                y: sin(Double(index) * .pi / 4.0) * 2
+                            )
+                    }
+                    
+                    // Main text with white color for maximum contrast
+                    Text(percentageText)
+                        .font(.custom(fontName, size: fontSize))
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .shadow(color: .black, radius: 2, x: 0, y: 0)
+                }
+                .frame(width: geometry.size.width)
+            }
         }
+        .frame(height: 24)
     }
 }
 
 #if DEBUG
-#Preview {
-    VStack(spacing: 16) {
-        BatteryBarView(percentage: 90)
-        BatteryBarView(percentage: 56)
-        BatteryBarView(percentage: 10, barForeground: .red, inverseLabelColor: .white)
+#Preview("Battery Levels") {
+    VStack(spacing: 20) {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("High Battery (90%)")
+                .font(.caption)
+                .foregroundColor(.secondary)
+            BatteryBarView(percentage: 90)
+                .frame(width: 400)
+        }
+        
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Medium Battery (56%)")
+                .font(.caption)
+                .foregroundColor(.secondary)
+            BatteryBarView(percentage: 56)
+                .frame(width: 400)
+        }
+        
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Low Battery (15%)")
+                .font(.caption)
+                .foregroundColor(.secondary)
+            BatteryBarView(percentage: 15)
+                .frame(width: 400)
+        }
+        
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Critical Battery (5%)")
+                .font(.caption)
+                .foregroundColor(.secondary)
+            BatteryBarView(percentage: 5)
+                .frame(width: 400)
+        }
+        
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Full Battery (100%)")
+                .font(.caption)
+                .foregroundColor(.secondary)
+            BatteryBarView(percentage: 100)
+                .frame(width: 400)
+        }
     }
     .padding()
-    .background(Color.black)
+    .background(Color(nsColor: .windowBackgroundColor))
 }
 #endif
 

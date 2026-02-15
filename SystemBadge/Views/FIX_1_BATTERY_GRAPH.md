@@ -57,7 +57,8 @@ Completely redesigned the BatteryBarView using modern SwiftUI components:
 4. **Enhanced Visual Polish**
    - Smooth animations when percentage changes (0.3s ease-in-out)
    - Linear gradient fill for depth
-   - Text shadow for better readability
+   - **High-contrast text with stroke outline** for readability on any background
+   - White text with black outline (8-point stroke) ensures visibility
    - Rounded corners for modern appearance
    - Subtle border on background bar
 
@@ -96,12 +97,20 @@ ZStack(alignment: .leading) {
         .fill(LinearGradient(...))
         .frame(width: geometry.size.width * (percentage / 100.0))
     
-    Text(percentageText)
-        .frame(width: geometry.size.width)
+    // High contrast text with stroke outline
+    ZStack {
+        ForEach(0..<8) { index in
+            Text(percentageText)
+                .foregroundColor(.black)
+                .offset(x: cos(angle) * 2, y: sin(angle) * 2)
+        }
+        Text(percentageText)
+            .foregroundColor(.white)
+    }
 }
 ```
 
-**Benefits**: Clean layering, precise positioning, no overlaps, easy to understand
+**Benefits**: Clean layering, precise positioning, no overlaps, excellent contrast, easy to understand
 
 ---
 
@@ -128,6 +137,37 @@ The updated view includes comprehensive preview tests:
 - ✅ Edge cases: 0%, 100% render correctly
 - ✅ Animation: Smooth transitions when percentage changes
 - ✅ Text readability: Percentage clearly visible on all backgrounds
+- ✅ **High contrast**: White text with black stroke outline visible on green, orange, and red fills
+
+### Contrast Technique:
+
+The text uses an 8-point stroke effect for maximum readability:
+
+```swift
+ZStack {
+    // 8 black text layers positioned in a circle around the center
+    ForEach(0..<8, id: \.self) { index in
+        Text(percentageText)
+            .foregroundColor(.black)
+            .offset(
+                x: cos(Double(index) * .pi / 4.0) * 2,
+                y: sin(Double(index) * .pi / 4.0) * 2
+            )
+    }
+    
+    // White text on top for maximum contrast
+    Text(percentageText)
+        .foregroundColor(.white)
+        .shadow(color: .black, radius: 2)
+}
+```
+
+This creates a consistent stroke outline that ensures the percentage is readable against:
+- Green backgrounds (high battery)
+- Orange backgrounds (medium battery)
+- Red backgrounds (low battery)
+- Gray backgrounds (empty portion)
+- Any custom user theme colors
 
 ---
 
@@ -145,6 +185,7 @@ The updated view includes comprehensive preview tests:
 3. **No more hidden spacer views** - Clean ZStack layering
 4. **Better performance** - SwiftUI shapes are optimized
 5. **Future-proof** - Easy to add features (charging indicator, time remaining, etc.)
+6. **High contrast text** - White text with black stroke visible on any background color
 
 ---
 
@@ -187,5 +228,6 @@ Fix 1 successfully resolves the battery graph display issues by replacing charac
 - ✅ Smooth and polished with animations
 - ✅ Much simpler and more maintainable
 - ✅ Fully backward compatible
+- ✅ **High-contrast text readable on any background** (white text with black stroke)
 
-**Result**: The battery percentage is now easy to read at a glance, with professional visual polish and reliable rendering.
+**Result**: The battery percentage is now easy to read at a glance, with professional visual polish, excellent contrast, and reliable rendering.
