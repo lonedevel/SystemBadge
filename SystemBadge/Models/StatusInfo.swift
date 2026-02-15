@@ -47,8 +47,21 @@ actor Shell {
         let runToCompletion: () async throws -> String = {
             #if compiler(>=6.0)
             if #available(macOS 13.0, *) {
-                let outData = try await outPipe.fileHandleForReading.readToEnd() ?? Data()
-                let errData = try await errPipe.fileHandleForReading.readToEnd() ?? Data()
+                // Use async bytes sequence instead of readToEnd
+                let outHandle = outPipe.fileHandleForReading
+                let errHandle = errPipe.fileHandleForReading
+                
+                // Read output asynchronously
+                var outData = Data()
+                for try await byte in outHandle.bytes {
+                    outData.append(byte)
+                }
+                
+                var errData = Data()
+                for try await byte in errHandle.bytes {
+                    errData.append(byte)
+                }
+                
                 // Await process termination asynchronously instead of blocking
                 try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
                     process.terminationHandler = { _ in
@@ -292,8 +305,10 @@ class StatusInfo: ObservableObject {
         timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             guard let self else { return }
-            self.tick = (self.tick + 1) % RefreshCadence.slow.rawValue
-            Task { await self.refreshAccordingToCadence() }
+            Task { @MainActor in
+                self.tick = (self.tick + 1) % RefreshCadence.slow.rawValue
+                await self.refreshAccordingToCadence()
+            }
         }
         if let timer {
             RunLoop.main.add(timer, forMode: .common)
@@ -537,7 +552,7 @@ class StatusInfo: ObservableObject {
                 let isInternal = resourceValues.volumeIsInternal ?? false
                 let isRemovable = resourceValues.volumeIsRemovable ?? false
                 let isLocal = resourceValues.volumeIsLocal ?? true
-                let isReadOnly = resourceValues.volumeIsReadOnly ?? false
+                let _ = resourceValues.volumeIsReadOnly ?? false
                 
                 // Skip certain problematic volumes
                 // - APFS "Data" volumes (shown as separate but part of system volume)
