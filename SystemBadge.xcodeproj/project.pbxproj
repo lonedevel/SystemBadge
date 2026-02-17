@@ -9,6 +9,15 @@
 /* Begin PBXBuildFile section */
 		DC0842A927FA479600999507 /* FontPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0842A827FA479600999507 /* FontPicker.swift */; };
 		DC0BCA2D2F42803100FE7E98 /* HOTFIX_CONSOLE_WARNINGS.md in Resources */ = {isa = PBXBuildFile; fileRef = DC0BCA2C2F42803100FE7E98 /* HOTFIX_CONSOLE_WARNINGS.md */; };
+		DC0BCA2F2F428B0300FE7E98 /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0BCA2E2F428B0300FE7E98 /* ThemeManager.swift */; };
+		DC0BCA312F428B5400FE7E98 /* THEMING_GUIDE.md in Resources */ = {isa = PBXBuildFile; fileRef = DC0BCA302F428B5400FE7E98 /* THEMING_GUIDE.md */; };
+		DC0BCA352F428BB400FE7E98 /* QUICKSTART_THEMING.md in Resources */ = {isa = PBXBuildFile; fileRef = DC0BCA342F428BB400FE7E98 /* QUICKSTART_THEMING.md */; };
+		DC0BCA372F428BED00FE7E98 /* ARCHITECTURE_DIAGRAM.md in Resources */ = {isa = PBXBuildFile; fileRef = DC0BCA362F428BED00FE7E98 /* ARCHITECTURE_DIAGRAM.md */; };
+		DC0BCA392F428C2100FE7E98 /* IMPLEMENTATION_SUMMARY.md in Resources */ = {isa = PBXBuildFile; fileRef = DC0BCA382F428C2100FE7E98 /* IMPLEMENTATION_SUMMARY.md */; };
+		DC0BCA3B2F428C6900FE7E98 /* MIGRATION_GUIDE.md in Resources */ = {isa = PBXBuildFile; fileRef = DC0BCA3A2F428C6900FE7E98 /* MIGRATION_GUIDE.md */; };
+		DC0BCA3D2F42ABCC00FE7E98 /* GLASS_EFFECT_FIX.md in Resources */ = {isa = PBXBuildFile; fileRef = DC0BCA3C2F42ABCC00FE7E98 /* GLASS_EFFECT_FIX.md */; };
+		DC0BCA3F2F42AE0400FE7E98 /* GlassEffectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0BCA3E2F42AE0400FE7E98 /* GlassEffectView.swift */; };
+		DC0BCA412F42B04600FE7E98 /* WindowConfigurator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0BCA402F42B04600FE7E98 /* WindowConfigurator.swift */; };
 		DC62B82627AA353400F2F109 /* SystemBadgeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC62B82527AA353400F2F109 /* SystemBadgeApp.swift */; };
 		DC62B82A27AA353700F2F109 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DC62B82927AA353700F2F109 /* Assets.xcassets */; };
 		DC62B82D27AA353700F2F109 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DC62B82C27AA353700F2F109 /* Preview Assets.xcassets */; };
@@ -30,6 +39,15 @@
 /* Begin PBXFileReference section */
 		DC0842A827FA479600999507 /* FontPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontPicker.swift; sourceTree = "<group>"; };
 		DC0BCA2C2F42803100FE7E98 /* HOTFIX_CONSOLE_WARNINGS.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = HOTFIX_CONSOLE_WARNINGS.md; sourceTree = "<group>"; };
+		DC0BCA2E2F428B0300FE7E98 /* ThemeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeManager.swift; sourceTree = "<group>"; };
+		DC0BCA302F428B5400FE7E98 /* THEMING_GUIDE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = THEMING_GUIDE.md; sourceTree = "<group>"; };
+		DC0BCA342F428BB400FE7E98 /* QUICKSTART_THEMING.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = QUICKSTART_THEMING.md; sourceTree = "<group>"; };
+		DC0BCA362F428BED00FE7E98 /* ARCHITECTURE_DIAGRAM.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ARCHITECTURE_DIAGRAM.md; sourceTree = "<group>"; };
+		DC0BCA382F428C2100FE7E98 /* IMPLEMENTATION_SUMMARY.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = IMPLEMENTATION_SUMMARY.md; sourceTree = "<group>"; };
+		DC0BCA3A2F428C6900FE7E98 /* MIGRATION_GUIDE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = MIGRATION_GUIDE.md; sourceTree = "<group>"; };
+		DC0BCA3C2F42ABCC00FE7E98 /* GLASS_EFFECT_FIX.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = GLASS_EFFECT_FIX.md; sourceTree = "<group>"; };
+		DC0BCA3E2F42AE0400FE7E98 /* GlassEffectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassEffectView.swift; sourceTree = "<group>"; };
+		DC0BCA402F42B04600FE7E98 /* WindowConfigurator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowConfigurator.swift; sourceTree = "<group>"; };
 		DC62B82227AA353400F2F109 /* SystemBadge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SystemBadge.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DC62B82527AA353400F2F109 /* SystemBadgeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemBadgeApp.swift; sourceTree = "<group>"; };
 		DC62B82927AA353700F2F109 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -97,6 +115,10 @@
 				DC62B82927AA353700F2F109 /* Assets.xcassets */,
 				DC62B82E27AA353700F2F109 /* SystemBadge.entitlements */,
 				DC62B82B27AA353700F2F109 /* Preview Content */,
+				DC0BCA302F428B5400FE7E98 /* THEMING_GUIDE.md */,
+				DC0BCA342F428BB400FE7E98 /* QUICKSTART_THEMING.md */,
+				DC0BCA362F428BED00FE7E98 /* ARCHITECTURE_DIAGRAM.md */,
+				DC0BCA3A2F428C6900FE7E98 /* MIGRATION_GUIDE.md */,
 			);
 			path = SystemBadge;
 			sourceTree = "<group>";
@@ -118,6 +140,11 @@
 				DCADF32D27E6C42500B5D18F /* PreferencesView.swift */,
 				DC0842A827FA479600999507 /* FontPicker.swift */,
 				DC69C4EC2E8CD15B0057FA9D /* BatteryBarView.swift */,
+				DC0BCA2E2F428B0300FE7E98 /* ThemeManager.swift */,
+				DC0BCA382F428C2100FE7E98 /* IMPLEMENTATION_SUMMARY.md */,
+				DC0BCA3C2F42ABCC00FE7E98 /* GLASS_EFFECT_FIX.md */,
+				DC0BCA3E2F42AE0400FE7E98 /* GlassEffectView.swift */,
+				DC0BCA402F42B04600FE7E98 /* WindowConfigurator.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -207,14 +234,20 @@
 			buildActionMask = 2147483647;
 			files = (
 				DCD1EF3F27B21E8000385E55 /* enhanced_dot_digital-7.ttf in Resources */,
+				DC0BCA392F428C2100FE7E98 /* IMPLEMENTATION_SUMMARY.md in Resources */,
 				DCD1EF4427B21E8000385E55 /* led_counter-7_italic.ttf in Resources */,
 				DCD1EF4227B21E8000385E55 /* MobileFont.ttf in Resources */,
 				DC62B82D27AA353700F2F109 /* Preview Assets.xcassets in Resources */,
+				DC0BCA352F428BB400FE7E98 /* QUICKSTART_THEMING.md in Resources */,
+				DC0BCA3D2F42ABCC00FE7E98 /* GLASS_EFFECT_FIX.md in Resources */,
 				DCD1EF4127B21E8000385E55 /* minisystem.ttf in Resources */,
+				DC0BCA312F428B5400FE7E98 /* THEMING_GUIDE.md in Resources */,
 				DC0BCA2D2F42803100FE7E98 /* HOTFIX_CONSOLE_WARNINGS.md in Resources */,
 				DCD1EF4327B21E8000385E55 /* led_counter-7.ttf in Resources */,
 				DCD1EF4027B21E8000385E55 /* GAS_____.TTF in Resources */,
+				DC0BCA3B2F428C6900FE7E98 /* MIGRATION_GUIDE.md in Resources */,
 				DC62B82A27AA353700F2F109 /* Assets.xcassets in Resources */,
+				DC0BCA372F428BED00FE7E98 /* ARCHITECTURE_DIAGRAM.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -234,6 +267,9 @@
 				DC62B83D27AA385A00F2F109 /* StatusInfo.swift in Sources */,
 				DCADF32E27E6C42500B5D18F /* PreferencesView.swift in Sources */,
 				DC0842A927FA479600999507 /* FontPicker.swift in Sources */,
+				DC0BCA3F2F42AE0400FE7E98 /* GlassEffectView.swift in Sources */,
+				DC0BCA412F42B04600FE7E98 /* WindowConfigurator.swift in Sources */,
+				DC0BCA2F2F428B0300FE7E98 /* ThemeManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -391,7 +427,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 15.6;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.michaudsolutions.SystemBadge;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -426,7 +462,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 15.6;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.michaudsolutions.SystemBadge;
 				PRODUCT_NAME = "$(TARGET_NAME)";

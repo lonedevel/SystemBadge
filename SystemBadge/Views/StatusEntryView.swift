@@ -13,9 +13,26 @@ struct StatusEntryView: View {
 	let name: String
 	let value: String
 	let icon: Image
-	@AppStorage("metricColor") private var metricColor = Color("MetricColor")
-	@AppStorage("labelColor") private var labelColor = Color("LabelColor")
+	@AppStorage("metricColor") private var customMetricColor = Color("MetricColor")
+	@AppStorage("labelColor") private var customLabelColor = Color("LabelColor")
+	@AppStorage("useSystemColors") private var useSystemColors = true
+	@AppStorage("enableLiquidGlass") private var enableLiquidGlass = true
+	@Environment(\.colorScheme) private var colorScheme
 	
+	// Dynamic colors based on theme settings
+	private var metricColor: Color {
+		if useSystemColors || enableLiquidGlass {
+			return colorScheme == .dark ? .primary : .primary
+		}
+		return customMetricColor
+	}
+	
+	private var labelColor: Color {
+		if useSystemColors || enableLiquidGlass {
+			return colorScheme == .dark ? .secondary : .secondary
+		}
+		return customLabelColor
+	}
 	
     var body: some View {
 		HStack {
@@ -38,6 +55,8 @@ struct StatusEntryView: View {
 					barBackground: labelColor,
 					inverseLabelColor: labelColor
 				)
+				.frame(width: 400.0, height: 24, alignment: .leading)
+				.clipped()
 				.frame(width: 450.0, alignment: .leading)
 			} else {
 				Text(value)

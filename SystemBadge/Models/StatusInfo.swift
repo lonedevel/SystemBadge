@@ -554,7 +554,7 @@ class StatusInfo: ObservableObject {
                 let isInternal = resourceValues.volumeIsInternal ?? false
                 let isRemovable = resourceValues.volumeIsRemovable ?? false
                 let isLocal = resourceValues.volumeIsLocal ?? true
-                let isReadOnly = resourceValues.volumeIsReadOnly ?? false
+				_ = resourceValues.volumeIsReadOnly ?? false
                 let isBrowsable = resourceValues.volumeIsBrowsable ?? true
                 let supportsVolumeSizes = resourceValues.volumeSupportsVolumeSizes ?? true
                 

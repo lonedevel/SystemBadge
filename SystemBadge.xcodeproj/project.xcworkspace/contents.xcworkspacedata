@@ -5,6 +5,18 @@
       location = "self:">
    </FileRef>
    <FileRef
-      location = "group:BatteryBarView.swift">
+      location = "group:DOCUMENTATION_INDEX.md">
+   </FileRef>
+   <FileRef
+      location = "group:CHANGES_SUMMARY.md">
+   </FileRef>
+   <FileRef
+      location = "group:BUILD_TEST_CHECKLIST.md">
+   </FileRef>
+   <FileRef
+      location = "group:VISUAL_FEATURE_OVERVIEW.md">
+   </FileRef>
+   <FileRef
+      location = "group:GlassEffectView.swift">
    </FileRef>
 </Workspace>

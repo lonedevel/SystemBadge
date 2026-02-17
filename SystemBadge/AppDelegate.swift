@@ -10,6 +10,7 @@ import AppKit
 import SwiftUI
 
 //@NSApplicationMain
+@available(macOS 26.0, *)
 class AppDelegate: NSObject, NSApplicationDelegate {
 
 	var popover: NSPopover!
@@ -24,7 +25,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		self.popover = NSPopover()
 		self.popover.contentSize = NSSize(width: 650, height: 250)
 		self.popover.behavior = .transient
-		self.popover.contentViewController = NSHostingController(rootView: contentView)
+		
+		// Use standard hosting controller - glass effect is now in SwiftUI
+		let hostingController = NSHostingController(rootView: contentView)
+		self.popover.contentViewController = hostingController
 		
 		self.statusBarItem = NSStatusBar.system.statusItem(withLength: CGFloat(NSStatusItem.variableLength))
 		if let button = self.statusBarItem.button {
@@ -47,3 +51,4 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 		 }
 	}
 }
+

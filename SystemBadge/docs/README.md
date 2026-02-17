@@ -1,11 +1,21 @@
 # SystemBadge
 
-A lightweight macOS menu bar application that provides real-time system information and monitoring through an elegant popover interface.
+A lightweight macOS menu bar application that provides real-time system information and monitoring through an elegant popover interface with modern Liquid Glass design.
 
 ![Platform](https://img.shields.io/badge/platform-macOS%2013.0+-blue)
 ![Swift](https://img.shields.io/badge/swift-6.0+-orange)
 ![SwiftUI](https://img.shields.io/badge/SwiftUI-enabled-green)
 ![License](https://img.shields.io/badge/license-MIT-green)
+
+## ✨ What's New in v2.0
+
+- **🌓 Full Light/Dark Mode Support**: Automatically adapts to your macOS appearance settings
+- **💎 Liquid Glass Design**: Modern, dynamic glass material with blur and light reflection effects
+- **🎨 Enhanced Theming**: Choose between system colors or custom color schemes
+- **⚙️ Advanced Customization**: New Glass Effect settings tab with corner radius and tint controls
+- **🔄 Automatic Adaptation**: Colors and effects dynamically update when switching appearance modes
+
+See [THEMING_GUIDE.md](THEMING_GUIDE.md) for detailed information on the new theming features.
 
 ## Overview
 
@@ -19,10 +29,18 @@ SystemBadge is a native macOS application built with SwiftUI and AppKit that dis
 - **Comprehensive**: 15+ system metrics across 5 categories
 - **Lightweight**: Minimal resource usage with intelligent refresh cadence
 - **Customizable**: Personalize colors, fonts, and displayed metrics
+- **Modern Design**: Full support for light/dark mode and Liquid Glass effects
 - **Native**: Built entirely with Swift, SwiftUI, and macOS APIs
 - **Private**: All data collected locally, no telemetry or network tracking
 
 ## Features
+
+### Appearance & Theming
+- **Light/Dark Mode Support**: Automatically adapts to macOS appearance settings
+- **Liquid Glass Design**: Modern, dynamic glass material with blur and light reflection
+- **Customizable Colors**: Choose custom colors or use system-adaptive colors
+- **Glass Effect Customization**: Adjust corner radius and tint color
+- **Font Selection**: Choose your preferred font for metrics display
 
 ### General Information
 - **Current Date & Time**: Real-time date and time display
@@ -102,12 +120,24 @@ Storage space monitoring:
 - Menu bar integration using NSStatusBar
 - Popover presentation management
 - Toggle show/hide functionality
+- **Liquid Glass Support**: Custom `GlassHostingController` with `NSGlassEffectView`
+- **Appearance Observation**: Automatically updates glass effect on system appearance changes
+- **Theme Persistence**: Manages glass effect settings via AppStorage
 
 **PreferencesView.swift**
-- Settings UI with Appearance and Content tabs
+- Settings UI with Appearance, Glass Effect, and Content tabs
 - Font picker integration
 - Color customization (metrics, labels, background)
 - Feature toggles for CPU and public internet display
+- **Theme Settings**: Light/dark mode and system color toggles
+- **Glass Effect Settings**: Corner radius, tint color, and effect enable/disable
+- **Contextual Help**: Helpful descriptions for each setting
+
+#### 5. **ThemeManager.swift**
+Centralized theme management for consistent appearance across the app:
+- Dynamic color adaptation based on light/dark mode
+- System color vs. custom color switching
+- Environment value integration for easy access throughout the app
 
 #### 5. **FontPicker.swift**
 Custom SwiftUI component for system font selection using NSFontPanel.
@@ -171,6 +201,10 @@ The app persists the following preferences:
 - `metricColor`: Color for metric values
 - `labelColor`: Color for metric labels
 - `backgroundColor`: Popover background color
+- `useSystemColors`: Enable automatic light/dark mode color adaptation
+- `enableLiquidGlass`: Enable/disable Liquid Glass effect
+- `glassCornerRadius`: Corner radius for glass effect (0-32)
+- `glassTintColor`: Optional tint color for glass effect
 
 ### Adding Custom Metrics
 To add a new metric, edit `StatusInfo.buildEntries()`:
@@ -194,14 +228,15 @@ statusEntries.append(StatusEntry(
 ```
 SystemBadge/
 ├── SystemBadgeApp.swift      # App entry point
-├── AppDelegate.swift         # Menu bar integration
-├── ContentView.swift         # Main UI
+├── AppDelegate.swift         # Menu bar integration & Liquid Glass support
+├── ContentView.swift         # Main UI with theme adaptation
 ├── StatusInfo.swift          # Metric collection & refresh
 ├── BatteryInfo.swift         # Battery monitoring (IOKit)
 ├── DiskInfo.swift           # Storage information
 ├── StatusEntryView.swift    # Metric display component
 ├── BatteryBarView.swift     # Custom battery visualization
-├── PreferencesView.swift    # Settings UI
+├── PreferencesView.swift    # Settings UI with theme controls
+├── ThemeManager.swift       # Centralized theme management
 └── FontPicker.swift         # Font selection component
 ```
 
@@ -215,6 +250,8 @@ SystemBadge/
 
 ## Future Enhancement Ideas
 
+- [x] **Dark mode optimization** - ✅ Implemented with full light/dark mode support
+- [x] **Liquid Glass design** - ✅ Implemented with NSGlassEffectView
 - [ ] Dynamic volume discovery for storage monitoring
 - [ ] CPU/Memory/Network usage graphs
 - [ ] Notification support for battery/storage thresholds
@@ -224,7 +261,6 @@ SystemBadge/
 - [ ] Historical data tracking
 - [ ] Customizable metric visibility per-tab
 - [ ] Localization support
-- [ ] Dark mode optimization
 
 ## Contributing
 
