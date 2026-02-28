@@ -16,18 +16,19 @@ class WindowConfigurator {
 	///   - window: The NSWindow to configure
 	///   - enableGlass: Whether to enable glass effect mode
 	static func configureForGlassEffect(_ window: NSWindow, enableGlass: Bool) {
-		if enableGlass {
-			// Make window transparent for glass effect
-			window.isOpaque = false
-			window.backgroundColor = .clear
-			window.titlebarAppearsTransparent = true
-			window.styleMask.insert(.fullSizeContentView)
+        if enableGlass {
+            // Make window semi-opaque for glass effect readability
+            let glassBackgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(0.7)
+            window.isOpaque = false
+            window.backgroundColor = glassBackgroundColor
+            window.titlebarAppearsTransparent = true
+            window.styleMask.insert(.fullSizeContentView)
 			
 			// Configure the window's content view for visual effects
-			if let contentView = window.contentView {
-				contentView.wantsLayer = true
-				contentView.layer?.backgroundColor = .clear
-			}
+            if let contentView = window.contentView {
+                contentView.wantsLayer = true
+                contentView.layer?.backgroundColor = glassBackgroundColor.cgColor
+            }
 		} else {
 			// Restore default window appearance
 			window.isOpaque = true
@@ -41,25 +42,26 @@ class WindowConfigurator {
 	/// - Parameters:
 	///   - popover: The NSPopover to configure
 	///   - enableGlass: Whether to enable glass effect mode
-	static func configurePopoverForGlassEffect(_ popover: NSPopover, enableGlass: Bool) {
-		if enableGlass {
-			popover.behavior = .transient
-			popover.animates = true
-			
-			// Access the popover's window and configure it
-			DispatchQueue.main.async {
-				if let popoverWindow = popover.contentViewController?.view.window {
-					popoverWindow.isOpaque = false
-					popoverWindow.backgroundColor = .clear
-					
-					if let contentView = popoverWindow.contentView {
-						contentView.wantsLayer = true
-						contentView.layer?.backgroundColor = .clear
-					}
-				}
-			}
-		}
-	}
+    static func configurePopoverForGlassEffect(_ popover: NSPopover, enableGlass: Bool) {
+        if enableGlass {
+            popover.behavior = .transient
+            popover.animates = true
+
+            // Access the popover's window and configure it
+            DispatchQueue.main.async {
+                if let popoverWindow = popover.contentViewController?.view.window {
+                    let glassBackgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(0.7)
+                    popoverWindow.isOpaque = false
+                    popoverWindow.backgroundColor = glassBackgroundColor
+
+                    if let contentView = popoverWindow.contentView {
+                        contentView.wantsLayer = true
+                        contentView.layer?.backgroundColor = glassBackgroundColor.cgColor
+                    }
+                }
+            }
+        }
+    }
 }
 
 /// SwiftUI view modifier to configure window for glass effects

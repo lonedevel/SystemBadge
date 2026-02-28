@@ -12,7 +12,9 @@ import AppKit
 struct GlassEffectView: NSViewRepresentable {
 	var cornerRadius: CGFloat = 16.0
 	var tintColor: NSColor?
-	var material: NSVisualEffectView.Material = .underWindowBackground
+	var material: NSVisualEffectView.Material = .contentBackground  // Match main window
+	var blendingMode: NSVisualEffectView.BlendingMode = .withinWindow  // Match main window
+	var opacity: CGFloat = 0.85  // Added opacity control for better visibility
 	
 	func makeNSView(context: Context) -> NSVisualEffectView {
 		let effectView = NSVisualEffectView()
@@ -20,20 +22,27 @@ struct GlassEffectView: NSViewRepresentable {
 		// Use the specified material for blur effect
 		effectView.material = material
 		
-		// CRITICAL: Use behindWindow to blur content BEHIND the window (desktop, etc.)
-		effectView.blendingMode = .behindWindow
+		// Use specified blending mode (behindWindow blurs desktop, withinWindow blurs content)
+		effectView.blendingMode = blendingMode
 		
 		effectView.state = .active
 		effectView.wantsLayer = true
 		effectView.layer?.cornerRadius = cornerRadius
 		
-		// Apply tint color if provided
+		// Apply tint color with adjustable opacity
 		if let tintColor = tintColor {
 			let colorLayer = CALayer()
-			colorLayer.backgroundColor = tintColor.withAlphaComponent(0.3).cgColor
+			colorLayer.backgroundColor = tintColor.withAlphaComponent(opacity * 0.5).cgColor
 			effectView.layer?.addSublayer(colorLayer)
 			colorLayer.frame = effectView.bounds
 			colorLayer.autoresizingMask = [.layerWidthSizable, .layerHeightSizable]
+		} else {
+			// Add a subtle white/gray overlay for better readability
+			let overlayLayer = CALayer()
+			overlayLayer.backgroundColor = NSColor.controlBackgroundColor.withAlphaComponent(opacity * 0.3).cgColor
+			effectView.layer?.addSublayer(overlayLayer)
+			overlayLayer.frame = effectView.bounds
+			overlayLayer.autoresizingMask = [.layerWidthSizable, .layerHeightSizable]
 		}
 		
 		return effectView
@@ -41,21 +50,26 @@ struct GlassEffectView: NSViewRepresentable {
 	
 	func updateNSView(_ nsView: NSVisualEffectView, context: Context) {
 		nsView.material = material
+		nsView.blendingMode = blendingMode
 		nsView.layer?.cornerRadius = cornerRadius
 		
-		// Update tint color
-		if let colorLayer = nsView.layer?.sublayers?.first(where: { $0.backgroundColor != nil }) {
-			if let tintColor = tintColor {
-				colorLayer.backgroundColor = tintColor.withAlphaComponent(0.3).cgColor
-			} else {
-				colorLayer.removeFromSuperlayer()
-			}
-		} else if let tintColor = tintColor {
+		// Remove existing color layers
+		nsView.layer?.sublayers?.filter { $0.backgroundColor != nil }.forEach { $0.removeFromSuperlayer() }
+		
+		// Apply updated tint color
+		if let tintColor = tintColor {
 			let colorLayer = CALayer()
-			colorLayer.backgroundColor = tintColor.withAlphaComponent(0.3).cgColor
+			colorLayer.backgroundColor = tintColor.withAlphaComponent(opacity * 0.5).cgColor
 			colorLayer.frame = nsView.bounds
 			colorLayer.autoresizingMask = [.layerWidthSizable, .layerHeightSizable]
 			nsView.layer?.addSublayer(colorLayer)
+		} else {
+			// Add a subtle overlay for better readability
+			let overlayLayer = CALayer()
+			overlayLayer.backgroundColor = NSColor.controlBackgroundColor.withAlphaComponent(opacity * 0.3).cgColor
+			overlayLayer.frame = nsView.bounds
+			overlayLayer.autoresizingMask = [.layerWidthSizable, .layerHeightSizable]
+			nsView.layer?.addSublayer(overlayLayer)
 		}
 	}
 }

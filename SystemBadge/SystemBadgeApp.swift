@@ -31,10 +31,11 @@ struct WindowAccessor: NSViewRepresentable {
 	private func configureWindow(for view: NSView) {
 		guard let window = view.window else { return }
 		
-		if enableGlass {
-			// Make window transparent
-			window.isOpaque = false
-			window.backgroundColor = .clear
+        if enableGlass {
+            // Make window semi-opaque for better readability
+            let glassBackgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(0.7)
+            window.isOpaque = false
+            window.backgroundColor = glassBackgroundColor
 			window.hasShadow = true
 			
 			// Full-size content view to extend to entire window including tab bar
@@ -48,9 +49,9 @@ struct WindowAccessor: NSViewRepresentable {
 			// Get the root content view
 			guard let contentView = window.contentView else { return }
 			
-			// Make the content view container transparent
-			contentView.wantsLayer = true
-			contentView.layer?.backgroundColor = .clear
+            // Make the content view container semi-opaque to match the window
+            contentView.wantsLayer = true
+            contentView.layer?.backgroundColor = glassBackgroundColor.cgColor
 			
 			// Check if we already have a visual effect view
 			let hasEffectView = contentView.subviews.first(where: { $0 is NSVisualEffectView }) != nil

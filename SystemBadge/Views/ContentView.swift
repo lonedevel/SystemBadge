@@ -16,11 +16,11 @@ class BadgeInfo: ObservableObject {
 	}
 }
 struct windowSize {
-	// change let to static - read comments
-	static let minWidth : CGFloat = 650
-	static let minHeight : CGFloat = 200
-	static let maxWidth : CGFloat = 650
-	static let maxHeight : CGFloat = 250
+    // change let to static - read comments
+    static let minWidth : CGFloat = 650
+    static let minHeight : CGFloat = 260
+    static let maxWidth : CGFloat = 650
+    static let maxHeight : CGFloat = 320
 }
 
 struct ContentView: View {
@@ -57,85 +57,88 @@ struct ContentView: View {
 	}
 	
 	var body: some View {
-		if !enableLiquidGlass {
-			// Only show background when glass is disabled
-			dynamicBackground.ignoresSafeArea()
-		}
-		
-		
-		GlassEffectContainer() {
-			ZStack {
-				// Background layer
-				
-				// Content layer
-				TabView {
-					VStack(spacing: 5) {
-						ScrollView {
-							ForEach(statusInfo.statusEntries.filter{ $0.category.contains("General") }) { (item) in
-								VStack {
-									StatusEntryView(name: item.name, value: item.value, icon: item.icon)
-
-								}
+		ZStack {
+			// Background layer - exactly matching main window configuration
+			if enableLiquidGlass {
+				GlassEffectView(
+					cornerRadius: glassCornerRadius,
+					tintColor: glassTintColor.map { NSColor($0) },
+					material: .contentBackground,  // Same as main window's WindowAccessor
+					blendingMode: .withinWindow,   // Same as main window's WindowAccessor
+					opacity: 0.85
+				)
+				.ignoresSafeArea()
+			} else {
+				dynamicBackground
+					.ignoresSafeArea()
+			}
+			
+			// Content layer
+			TabView {
+				VStack(spacing: 5) {
+					ScrollView {
+						ForEach(statusInfo.statusEntries.filter{ $0.category.contains("General") }) { item in
+							VStack {
+								StatusEntryView(name: item.name, value: item.value, icon: item.icon)
 							}
 						}
-						.glassEffect(.regular.tint(glassTintColor).interactive(), in: .rect(cornerRadius: 10.0))
 					}
-					.tabItem{
-						Label("General", systemImage: "paintpalette")
-					}
-					VStack(spacing: 5) {
-						ScrollView {
-							ForEach(statusInfo.statusEntries.filter{ $0.category.contains("Network") }) { (item) in
-								VStack {
-									StatusEntryView(name: item.name, value: item.value, icon: item.icon)
-//										.glassEffect(.regular.tint(glassTintColor).interactive(), in: .rect(cornerRadius: 16.0))
-								}
+					.padding(8)
+				}
+				.tabItem {
+					Label("General", systemImage: "paintpalette")
+				}
+				VStack(spacing: 5) {
+					ScrollView {
+						ForEach(statusInfo.statusEntries.filter{ $0.category.contains("Network") }) { item in
+							VStack {
+								StatusEntryView(name: item.name, value: item.value, icon: item.icon)
 							}
 						}
-						.glassEffect(.regular.tint(glassTintColor).interactive(), in: .rect(cornerRadius: 10.0))
 					}
-					.tabItem{
-						Label("Network", systemImage: "network")
-					}
-					VStack(spacing: 5) {
-						ScrollView {
-							ForEach(statusInfo.statusEntries.filter{ $0.category.contains("System") }) { (item) in
-								VStack {
-									StatusEntryView(name: item.name, value: item.value, icon: item.icon)
-								}
+					.padding(8)
+				}
+				.tabItem {
+					Label("Network", systemImage: "network")
+				}
+				VStack(spacing: 5) {
+					ScrollView {
+						ForEach(statusInfo.statusEntries.filter{ $0.category.contains("System") }) { item in
+							VStack {
+								StatusEntryView(name: item.name, value: item.value, icon: item.icon)
 							}
 						}
-						.glassEffect(.regular.tint(glassTintColor).interactive(), in: .rect(cornerRadius: 10.0))
 					}
-					.tabItem{
-						Label("System", systemImage: "desktopcomputer")
-					}
-					VStack(spacing: 5) {
-						ScrollView {
-							ForEach(statusInfo.statusEntries.filter{ $0.category.contains("Power") }) { (item) in
-								VStack {
-									StatusEntryView(name: item.name, value: item.value, icon: item.icon)
-								}
+					.padding(8)
+				}
+				.tabItem {
+					Label("System", systemImage: "desktopcomputer")
+				}
+				VStack(spacing: 5) {
+					ScrollView {
+						ForEach(statusInfo.statusEntries.filter{ $0.category.contains("Power") }) { item in
+							VStack {
+								StatusEntryView(name: item.name, value: item.value, icon: item.icon)
 							}
 						}
-						.glassEffect(.regular.tint(glassTintColor).interactive(), in: .rect(cornerRadius: 10.0))
 					}
-					.tabItem{
-						Label("Power", systemImage: "bolt.fill")
-					}
-					VStack(spacing: 5) {
-						ScrollView {
-							ForEach(statusInfo.statusEntries.filter{ $0.category.contains("Storage") }) { (item) in
-								VStack {
-									StatusEntryView(name: item.name, value: item.value, icon: item.icon)
-								}
+					.padding(8)
+				}
+				.tabItem {
+					Label("Power", systemImage: "bolt.fill")
+				}
+				VStack(spacing: 5) {
+					ScrollView {
+						ForEach(statusInfo.statusEntries.filter{ $0.category.contains("Storage") }) { item in
+							VStack {
+								StatusEntryView(name: item.name, value: item.value, icon: item.icon)
 							}
 						}
-						.glassEffect(.regular.tint(glassTintColor).interactive(), in: .rect(cornerRadius: 10.0))
 					}
-					.tabItem{
-						Label("Storage", systemImage: "internaldrive")
-					}
+					.padding(8)
+				}
+				.tabItem {
+					Label("Storage", systemImage: "internaldrive")
 				}
 			}
 		}
@@ -144,7 +147,6 @@ struct ContentView: View {
 			   maxWidth: windowSize.maxWidth,
 			   minHeight: windowSize.minHeight,
 			   maxHeight: windowSize.maxHeight)
-//		.glassEffect(.regular.tint(glassTintColor).interactive(), in: .rect(cornerRadius: 16.0))
 	}
 }
 

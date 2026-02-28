@@ -27,6 +27,8 @@
 		DC62B83E27AA387D00F2F109 /* TextViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC62B83527AA354B00F2F109 /* TextViews.swift */; };
 		DC62B83F27AA388100F2F109 /* StatusEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC62B83627AA354B00F2F109 /* StatusEntryView.swift */; };
 		DC69C4ED2E8CD15B0057FA9D /* BatteryBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC69C4EC2E8CD15B0057FA9D /* BatteryBarView.swift */; };
+		DCA4E60B2F537808001F4107 /* POPOVER_TAB_FIX.md in Resources */ = {isa = PBXBuildFile; fileRef = DCA4E60A2F537808001F4107 /* POPOVER_TAB_FIX.md */; };
+		DCA4E60D2F5379F3001F4107 /* GLASS_EFFECT_CONSISTENCY.md in Resources */ = {isa = PBXBuildFile; fileRef = DCA4E60C2F5379F3001F4107 /* GLASS_EFFECT_CONSISTENCY.md */; };
 		DCADF32E27E6C42500B5D18F /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCADF32D27E6C42500B5D18F /* PreferencesView.swift */; };
 		DCD1EF3F27B21E8000385E55 /* enhanced_dot_digital-7.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DCD1EF3E27B21D3300385E55 /* enhanced_dot_digital-7.ttf */; };
 		DCD1EF4027B21E8000385E55 /* GAS_____.TTF in Resources */ = {isa = PBXBuildFile; fileRef = DCD1EF3C27B21C0500385E55 /* GAS_____.TTF */; };
@@ -59,6 +61,8 @@
 		DC62B83827AA355F00F2F109 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DC62B83C27AA385A00F2F109 /* StatusInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatusInfo.swift; sourceTree = "<group>"; };
 		DC69C4EC2E8CD15B0057FA9D /* BatteryBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryBarView.swift; sourceTree = "<group>"; };
+		DCA4E60A2F537808001F4107 /* POPOVER_TAB_FIX.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = POPOVER_TAB_FIX.md; sourceTree = "<group>"; };
+		DCA4E60C2F5379F3001F4107 /* GLASS_EFFECT_CONSISTENCY.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = GLASS_EFFECT_CONSISTENCY.md; sourceTree = "<group>"; };
 		DCADF32D27E6C42500B5D18F /* PreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesView.swift; sourceTree = "<group>"; };
 		DCD1EF3927B21C0500385E55 /* MobileFont.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = MobileFont.ttf; sourceTree = "<group>"; };
 		DCD1EF3A27B21C0500385E55 /* minisystem.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = minisystem.ttf; sourceTree = "<group>"; };
@@ -119,6 +123,8 @@
 				DC0BCA342F428BB400FE7E98 /* QUICKSTART_THEMING.md */,
 				DC0BCA362F428BED00FE7E98 /* ARCHITECTURE_DIAGRAM.md */,
 				DC0BCA3A2F428C6900FE7E98 /* MIGRATION_GUIDE.md */,
+				DCA4E60A2F537808001F4107 /* POPOVER_TAB_FIX.md */,
+				DCA4E60C2F5379F3001F4107 /* GLASS_EFFECT_CONSISTENCY.md */,
 			);
 			path = SystemBadge;
 			sourceTree = "<group>";
@@ -233,6 +239,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DCA4E60B2F537808001F4107 /* POPOVER_TAB_FIX.md in Resources */,
 				DCD1EF3F27B21E8000385E55 /* enhanced_dot_digital-7.ttf in Resources */,
 				DC0BCA392F428C2100FE7E98 /* IMPLEMENTATION_SUMMARY.md in Resources */,
 				DCD1EF4427B21E8000385E55 /* led_counter-7_italic.ttf in Resources */,
@@ -248,6 +255,7 @@
 				DC0BCA3B2F428C6900FE7E98 /* MIGRATION_GUIDE.md in Resources */,
 				DC62B82A27AA353700F2F109 /* Assets.xcassets in Resources */,
 				DC0BCA372F428BED00FE7E98 /* ARCHITECTURE_DIAGRAM.md in Resources */,
+				DCA4E60D2F5379F3001F4107 /* GLASS_EFFECT_CONSISTENCY.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
