@@ -57,11 +57,11 @@ struct AppearanceSettingsView: View {
 					.font(.caption)
 					.foregroundColor(.secondary)
 				
-				ColorPicker("Metric Color", selection: $metricColor)
-					.disabled(useSystemColors && enableLiquidGlass)
+            ColorPicker("Metric Color", selection: $metricColor)
+                .disabled(useSystemColors)
 				
-				ColorPicker("Label Color", selection: $labelColor)
-					.disabled(useSystemColors && enableLiquidGlass)
+            ColorPicker("Label Color", selection: $labelColor)
+                .disabled(useSystemColors)
 				
 				ColorPicker("Background Color", selection: $backgroundColor)
 					.disabled(enableLiquidGlass)

@@ -20,19 +20,19 @@ struct StatusEntryView: View {
 	@Environment(\.colorScheme) private var colorScheme
 	
 	// Dynamic colors based on theme settings
-	private var metricColor: Color {
-		if useSystemColors || enableLiquidGlass {
-			return colorScheme == .dark ? .primary : .primary
-		}
-		return customMetricColor
-	}
+    private var metricColor: Color {
+        if useSystemColors {
+            return colorScheme == .dark ? .primary : .primary
+        }
+        return customMetricColor
+    }
 	
-	private var labelColor: Color {
-		if useSystemColors || enableLiquidGlass {
-			return colorScheme == .dark ? .secondary : .secondary
-		}
-		return customLabelColor
-	}
+    private var labelColor: Color {
+        if useSystemColors {
+            return colorScheme == .dark ? .secondary : .secondary
+        }
+        return customLabelColor
+    }
 	
     var body: some View {
 		HStack {
@@ -87,4 +87,3 @@ struct StatusEntryView_Previews: PreviewProvider {
 		}
 	}
 }
-

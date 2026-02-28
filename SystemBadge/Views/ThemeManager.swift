@@ -19,7 +19,7 @@ struct ThemeManager {
     
     /// Dynamic metric color based on theme settings
     var metricColor: Color {
-        if useSystemColors || enableLiquidGlass {
+        if useSystemColors {
             return colorScheme == .dark ? Color.primary : Color.primary
         }
         return customMetricColor
@@ -27,7 +27,7 @@ struct ThemeManager {
     
     /// Dynamic label color based on theme settings
     var labelColor: Color {
-        if useSystemColors || enableLiquidGlass {
+        if useSystemColors {
             return colorScheme == .dark ? Color.secondary : Color.secondary
         }
         return customLabelColor
@@ -35,7 +35,7 @@ struct ThemeManager {
     
     /// Returns appropriate colors for the current theme
     static func colors(for colorScheme: ColorScheme, useSystem: Bool, enableGlass: Bool) -> (metric: Color, label: Color) {
-        if useSystem || enableGlass {
+        if useSystem {
             return (
                 metric: colorScheme == .dark ? .primary : .primary,
                 label: colorScheme == .dark ? .secondary : .secondary
