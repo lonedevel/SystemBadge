@@ -14,12 +14,13 @@ struct ThemeManager {
     @AppStorage("enableLiquidGlass") private var enableLiquidGlass = true
     @AppStorage("metricColor") private var customMetricColor = Color("MetricColor")
     @AppStorage("labelColor") private var customLabelColor = Color("LabelColor")
+    @AppStorage("useCustomColorsWithGlass") private var useCustomColorsWithGlass = true
     
     let colorScheme: ColorScheme
     
     /// Dynamic metric color based on theme settings
     var metricColor: Color {
-        if useSystemColors {
+        if useSystemColors || (enableLiquidGlass && !useCustomColorsWithGlass) {
             return colorScheme == .dark ? Color.primary : Color.primary
         }
         return customMetricColor
@@ -27,7 +28,7 @@ struct ThemeManager {
     
     /// Dynamic label color based on theme settings
     var labelColor: Color {
-        if useSystemColors {
+        if useSystemColors || (enableLiquidGlass && !useCustomColorsWithGlass) {
             return colorScheme == .dark ? Color.secondary : Color.secondary
         }
         return customLabelColor

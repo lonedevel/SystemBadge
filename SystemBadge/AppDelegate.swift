@@ -13,9 +13,10 @@ import SwiftUI
 @available(macOS 26.0, *)
 class AppDelegate: NSObject, NSApplicationDelegate {
 
-	var popover: NSPopover!
-	var statusBarItem: NSStatusItem!
-	var badgeInfo = BadgeInfo()
+    var popover: NSPopover!
+    var statusBarItem: NSStatusItem!
+    var badgeInfo = BadgeInfo()
+    private var userDefaultsObserver: NSObjectProtocol?
 	
 	func applicationDidFinishLaunching(_ aNotification: Notification) {
 		// Create the SwiftUI view that provides the window contents.
@@ -44,12 +45,30 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 		
-		self.statusBarItem = NSStatusBar.system.statusItem(withLength: CGFloat(NSStatusItem.variableLength))
-		if let button = self.statusBarItem.button {
-			button.image = NSImage(named:"Icon")
-			button.action = #selector(AppDelegate.togglePopover(_:))
-		}
-	}
+        self.statusBarItem = NSStatusBar.system.statusItem(withLength: CGFloat(NSStatusItem.variableLength))
+        if let button = self.statusBarItem.button {
+            button.image = NSImage(named:"Icon")
+            button.action = #selector(AppDelegate.togglePopover(_:))
+        }
+
+        userDefaultsObserver = NotificationCenter.default.addObserver(
+            forName: UserDefaults.didChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            guard let self = self else { return }
+            if self.popover.isShown {
+                let enableGlass = UserDefaults.standard.object(forKey: "enableLiquidGlass") as? Bool ?? true
+                WindowConfigurator.configurePopoverForGlassEffect(self.popover, enableGlass: enableGlass)
+            }
+        }
+    }
+
+    deinit {
+        if let observer = userDefaultsObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
 	
 	// Create the status item
     @objc func togglePopover(_ sender: AnyObject?) {

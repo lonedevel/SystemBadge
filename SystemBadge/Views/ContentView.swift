@@ -27,9 +27,10 @@ struct ContentView: View {
 	@StateObject private var statusInfo = StatusInfo()
 	@AppStorage("backgroundColor") private var backgroundColor = Color("BackgroundColor")
 	@AppStorage("enableLiquidGlass") private var enableLiquidGlass = true
-	@AppStorage("useSystemColors") private var useSystemColors = true
-	@AppStorage("glassCornerRadius") private var glassCornerRadius = 16.0
-	@AppStorage("glassTintColor") private var glassTintColorData: Data?
+    @AppStorage("useSystemColors") private var useSystemColors = true
+    @AppStorage("glassCornerRadius") private var glassCornerRadius = 16.0
+    @AppStorage("glassTintColor") private var glassTintColorData: Data?
+    @AppStorage("glassOpacity") private var glassOpacity = 85.0
 	@Environment(\.colorScheme) private var colorScheme
 	@ObservedObject var badge: BadgeInfo
 	
@@ -60,13 +61,13 @@ struct ContentView: View {
 		ZStack {
 			// Background layer - exactly matching main window configuration
 			if enableLiquidGlass {
-				GlassEffectView(
-					cornerRadius: glassCornerRadius,
-					tintColor: glassTintColor.map { NSColor($0) },
-					material: .contentBackground,  // Same as main window's WindowAccessor
-					blendingMode: .withinWindow,   // Same as main window's WindowAccessor
-					opacity: 0.85
-				)
+                GlassEffectView(
+                    cornerRadius: glassCornerRadius,
+                    tintColor: glassTintColor.map { NSColor($0) },
+                    material: .contentBackground,  // Same as main window's WindowAccessor
+                    blendingMode: .withinWindow,   // Same as main window's WindowAccessor
+                    opacity: CGFloat(glassOpacity / 100.0)
+                )
 				.ignoresSafeArea()
 			} else {
 				dynamicBackground

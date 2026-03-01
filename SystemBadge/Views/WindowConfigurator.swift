@@ -15,10 +15,12 @@ class WindowConfigurator {
 	/// - Parameters:
 	///   - window: The NSWindow to configure
 	///   - enableGlass: Whether to enable glass effect mode
-	static func configureForGlassEffect(_ window: NSWindow, enableGlass: Bool) {
+    static func configureForGlassEffect(_ window: NSWindow, enableGlass: Bool) {
         if enableGlass {
             // Make window semi-opaque for glass effect readability
-            let glassBackgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(0.7)
+            let opacityValue = UserDefaults.standard.object(forKey: "glassOpacity") as? Double ?? 85.0
+            let normalizedOpacity = max(0.0, min(1.0, opacityValue / 100.0))
+            let glassBackgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(CGFloat(normalizedOpacity))
             window.isOpaque = false
             window.backgroundColor = glassBackgroundColor
             window.titlebarAppearsTransparent = true
@@ -50,7 +52,9 @@ class WindowConfigurator {
             // Access the popover's window and configure it
             DispatchQueue.main.async {
                 if let popoverWindow = popover.contentViewController?.view.window {
-                    let glassBackgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(0.7)
+                    let opacityValue = UserDefaults.standard.object(forKey: "glassOpacity") as? Double ?? 85.0
+                    let normalizedOpacity = max(0.0, min(1.0, opacityValue / 100.0))
+                    let glassBackgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(CGFloat(normalizedOpacity))
                     popoverWindow.isOpaque = false
                     popoverWindow.backgroundColor = glassBackgroundColor
 
@@ -66,26 +70,30 @@ class WindowConfigurator {
 
 /// SwiftUI view modifier to configure window for glass effects
 struct WindowGlassConfiguration: ViewModifier {
-	let enableGlass: Bool
+    let enableGlass: Bool
+    @AppStorage("glassOpacity") private var glassOpacity = 85.0
 	
 	func body(content: Content) -> some View {
-		content
-			.onAppear {
-				configureCurrentWindow()
-			}
-			.onChange(of: enableGlass) { _, newValue in
-				configureCurrentWindow()
-			}
-	}
+        content
+            .onAppear {
+                configureCurrentWindow()
+            }
+            .onChange(of: enableGlass) { _, newValue in
+                configureCurrentWindow()
+            }
+            .onChange(of: glassOpacity) { _, newValue in
+                configureCurrentWindow()
+            }
+    }
 	
-	private func configureCurrentWindow() {
-		DispatchQueue.main.async {
-			// Find the key window or the first window
-			if let window = NSApplication.shared.keyWindow ?? NSApplication.shared.windows.first {
-				WindowConfigurator.configureForGlassEffect(window, enableGlass: enableGlass)
-			}
-		}
-	}
+    private func configureCurrentWindow() {
+        DispatchQueue.main.async {
+            let windows = NSApplication.shared.windows
+            for window in windows {
+                WindowConfigurator.configureForGlassEffect(window, enableGlass: enableGlass)
+            }
+        }
+    }
 }
 
 extension View {

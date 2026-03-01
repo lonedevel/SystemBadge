@@ -9,7 +9,8 @@ import SwiftUI
 
 /// Helper view to access and configure the window with glass effect
 struct WindowAccessor: NSViewRepresentable {
-	let enableGlass: Bool
+    let enableGlass: Bool
+    @AppStorage("glassOpacity") private var glassOpacity = 85.0
 	
 	func makeNSView(context: Context) -> NSView {
 		let view = NSView()
@@ -33,7 +34,8 @@ struct WindowAccessor: NSViewRepresentable {
 		
         if enableGlass {
             // Make window semi-opaque for better readability
-            let glassBackgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(0.7)
+            let normalizedOpacity = max(0.0, min(1.0, glassOpacity / 100.0))
+            let glassBackgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(CGFloat(normalizedOpacity))
             window.isOpaque = false
             window.backgroundColor = glassBackgroundColor
 			window.hasShadow = true
@@ -120,13 +122,14 @@ struct SystemBadgeApp: App {
 	@NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     var body: some Scene {
         WindowGroup {
-			ContentView(badge: badgeInfo)
-				.configureWindowForGlass(enableLiquidGlass)
+            ContentView(badge: badgeInfo)
+                .configureWindowForGlass(enableLiquidGlass)
         }
-		.windowLevel(.floating)
-		Settings {
-			PreferencesView()
-		}
+        .windowLevel(.floating)
+        Settings {
+            PreferencesView()
+                .configureWindowForGlass(enableLiquidGlass)
+        }
     }
 }
 

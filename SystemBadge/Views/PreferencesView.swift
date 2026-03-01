@@ -16,7 +16,7 @@ struct PreferencesView: View {
     @AppStorage("useCustomColorsWithGlass") private var useCustomColorsWithGlass = true
     @AppStorage("glassCornerRadius") private var glassCornerRadius = 16.0
     @AppStorage("glassTintColor") private var glassTintColorData: Data?
-    @AppStorage("glassOpacity") private var glassOpacity = 0.85
+    @AppStorage("glassOpacity") private var glassOpacity = 85.0
     @AppStorage("showCpu") private var showCpu = true
     @AppStorage("showPublicInternet") private var showPublicInternet = true
     @State private var metricFont: NSFont = NSFont.systemFont(ofSize: 24)
@@ -42,7 +42,7 @@ struct PreferencesView: View {
                     tintColor: enableTint ? NSColor(glassTintColor) : nil,
                     material: .contentBackground,
                     blendingMode: .withinWindow,
-                    opacity: CGFloat(glassOpacity)
+                    opacity: CGFloat(glassOpacity / 100.0)
                 )
                 .ignoresSafeArea()
             } else {
@@ -134,8 +134,8 @@ struct ThemeSettingsTab: View {
             Section("Glass") {
                 if enableLiquidGlass {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(String(format: "Opacity: %.2f", glassOpacity))
-                        Slider(value: $glassOpacity, in: 0.4...1.0, step: 0.05)
+                        Text("Opacity: \(Int(glassOpacity))%")
+                        Slider(value: $glassOpacity, in: 0...100, step: 1)
                             .help("Adjust glass intensity")
                     }
 

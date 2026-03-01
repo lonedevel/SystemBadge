@@ -14,21 +14,22 @@ struct StatusEntryView: View {
 	let value: String
 	let icon: Image
 	@AppStorage("metricColor") private var customMetricColor = Color("MetricColor")
-	@AppStorage("labelColor") private var customLabelColor = Color("LabelColor")
-	@AppStorage("useSystemColors") private var useSystemColors = true
-	@AppStorage("enableLiquidGlass") private var enableLiquidGlass = true
-	@Environment(\.colorScheme) private var colorScheme
+    @AppStorage("labelColor") private var customLabelColor = Color("LabelColor")
+    @AppStorage("useSystemColors") private var useSystemColors = true
+    @AppStorage("enableLiquidGlass") private var enableLiquidGlass = true
+    @AppStorage("useCustomColorsWithGlass") private var useCustomColorsWithGlass = true
+    @Environment(\.colorScheme) private var colorScheme
 	
 	// Dynamic colors based on theme settings
     private var metricColor: Color {
-        if useSystemColors {
+        if useSystemColors || (enableLiquidGlass && !useCustomColorsWithGlass) {
             return colorScheme == .dark ? .primary : .primary
         }
         return customMetricColor
     }
 	
     private var labelColor: Color {
-        if useSystemColors {
+        if useSystemColors || (enableLiquidGlass && !useCustomColorsWithGlass) {
             return colorScheme == .dark ? .secondary : .secondary
         }
         return customLabelColor
