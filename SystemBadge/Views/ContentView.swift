@@ -36,6 +36,7 @@ struct ContentView: View {
     @AppStorage("showSystemTab") private var showSystemTab = true
     @AppStorage("showPowerTab") private var showPowerTab = true
     @AppStorage("showStorageTab") private var showStorageTab = true
+    @AppStorage("showPerformanceTab") private var showPerformanceTab = true
 	@Environment(\.colorScheme) private var colorScheme
 	@ObservedObject var badge: BadgeInfo
 	
@@ -80,14 +81,14 @@ struct ContentView: View {
 			}
 			
 			// Content layer
-            if showGeneralTab || showNetworkTab || showSystemTab || showPowerTab || showStorageTab {
+            if showGeneralTab || showNetworkTab || showSystemTab || showPowerTab || showStorageTab || showPerformanceTab {
                 TabView {
                     if showGeneralTab {
                         VStack(spacing: 5) {
                             ScrollView {
                                 ForEach(statusInfo.statusEntries.filter{ $0.category.contains("General") }) { item in
                                     VStack {
-                                        StatusEntryView(name: item.name, value: item.value, icon: item.icon)
+                                        StatusEntryView(entry: item)
                                     }
                                 }
                             }
@@ -102,7 +103,7 @@ struct ContentView: View {
                             ScrollView {
                                 ForEach(statusInfo.statusEntries.filter{ $0.category.contains("Network") }) { item in
                                     VStack {
-                                        StatusEntryView(name: item.name, value: item.value, icon: item.icon)
+                                        StatusEntryView(entry: item)
                                     }
                                 }
                             }
@@ -117,7 +118,7 @@ struct ContentView: View {
                             ScrollView {
                                 ForEach(statusInfo.statusEntries.filter{ $0.category.contains("System") }) { item in
                                     VStack {
-                                        StatusEntryView(name: item.name, value: item.value, icon: item.icon)
+                                        StatusEntryView(entry: item)
                                     }
                                 }
                             }
@@ -132,7 +133,7 @@ struct ContentView: View {
                             ScrollView {
                                 ForEach(statusInfo.statusEntries.filter{ $0.category.contains("Power") }) { item in
                                     VStack {
-                                        StatusEntryView(name: item.name, value: item.value, icon: item.icon)
+                                        StatusEntryView(entry: item)
                                     }
                                 }
                             }
@@ -147,7 +148,7 @@ struct ContentView: View {
                             ScrollView {
                                 ForEach(statusInfo.statusEntries.filter{ $0.category.contains("Storage") }) { item in
                                     VStack {
-                                        StatusEntryView(name: item.name, value: item.value, icon: item.icon)
+                                        StatusEntryView(entry: item)
                                     }
                                 }
                             }
@@ -155,6 +156,21 @@ struct ContentView: View {
                         }
                         .tabItem {
                             Label("Storage", systemImage: "internaldrive")
+                        }
+                    }
+                    if showPerformanceTab {
+                        VStack(spacing: 5) {
+                            ScrollView {
+                                ForEach(statusInfo.statusEntries.filter{ $0.category.contains("Performance") }) { item in
+                                    VStack {
+                                        StatusEntryView(entry: item)
+                                    }
+                                }
+                            }
+                            .padding(8)
+                        }
+                        .tabItem {
+                            Label("Performance", systemImage: "speedometer")
                         }
                     }
                 }

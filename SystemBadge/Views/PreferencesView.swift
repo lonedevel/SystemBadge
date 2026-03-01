@@ -22,6 +22,7 @@ struct PreferencesView: View {
     @AppStorage("showSystemTab") private var showSystemTab = true
     @AppStorage("showPowerTab") private var showPowerTab = true
     @AppStorage("showStorageTab") private var showStorageTab = true
+    @AppStorage("showPerformanceTab") private var showPerformanceTab = true
     @State private var metricFont: NSFont = NSFont.systemFont(ofSize: 24)
     @State private var glassTintColor: Color = .clear
     @State private var enableTint = false
@@ -86,7 +87,8 @@ struct PreferencesView: View {
                     showNetworkTab: $showNetworkTab,
                     showSystemTab: $showSystemTab,
                     showPowerTab: $showPowerTab,
-                    showStorageTab: $showStorageTab
+                    showStorageTab: $showStorageTab,
+                    showPerformanceTab: $showPerformanceTab
                 )
                 .tabItem {
                     Label("Content", systemImage: "slider.horizontal.3")
@@ -217,6 +219,7 @@ struct ContentSettingsTab: View {
     @Binding var showSystemTab: Bool
     @Binding var showPowerTab: Bool
     @Binding var showStorageTab: Bool
+    @Binding var showPerformanceTab: Bool
 
     var body: some View {
         Form {
@@ -226,6 +229,7 @@ struct ContentSettingsTab: View {
                 Toggle("Show System Tab", isOn: $showSystemTab)
                 Toggle("Show Power Tab", isOn: $showPowerTab)
                 Toggle("Show Storage Tab", isOn: $showStorageTab)
+                Toggle("Show Performance Tab", isOn: $showPerformanceTab)
             }
         }
         .formStyle(.grouped)

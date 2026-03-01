@@ -29,6 +29,7 @@
 		DC69C4ED2E8CD15B0057FA9D /* BatteryBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC69C4EC2E8CD15B0057FA9D /* BatteryBarView.swift */; };
 		DCA4E60B2F537808001F4107 /* POPOVER_TAB_FIX.md in Resources */ = {isa = PBXBuildFile; fileRef = DCA4E60A2F537808001F4107 /* POPOVER_TAB_FIX.md */; };
 		DCA4E60D2F5379F3001F4107 /* GLASS_EFFECT_CONSISTENCY.md in Resources */ = {isa = PBXBuildFile; fileRef = DCA4E60C2F5379F3001F4107 /* GLASS_EFFECT_CONSISTENCY.md */; };
+		DCA4E60F2F54C01C001F4107 /* MetricViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCA4E60E2F54C01C001F4107 /* MetricViews.swift */; };
 		DCADF32E27E6C42500B5D18F /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCADF32D27E6C42500B5D18F /* PreferencesView.swift */; };
 		DCD1EF3F27B21E8000385E55 /* enhanced_dot_digital-7.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DCD1EF3E27B21D3300385E55 /* enhanced_dot_digital-7.ttf */; };
 		DCD1EF4027B21E8000385E55 /* GAS_____.TTF in Resources */ = {isa = PBXBuildFile; fileRef = DCD1EF3C27B21C0500385E55 /* GAS_____.TTF */; };
@@ -63,6 +64,7 @@
 		DC69C4EC2E8CD15B0057FA9D /* BatteryBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryBarView.swift; sourceTree = "<group>"; };
 		DCA4E60A2F537808001F4107 /* POPOVER_TAB_FIX.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = POPOVER_TAB_FIX.md; sourceTree = "<group>"; };
 		DCA4E60C2F5379F3001F4107 /* GLASS_EFFECT_CONSISTENCY.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = GLASS_EFFECT_CONSISTENCY.md; sourceTree = "<group>"; };
+		DCA4E60E2F54C01C001F4107 /* MetricViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricViews.swift; sourceTree = "<group>"; };
 		DCADF32D27E6C42500B5D18F /* PreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesView.swift; sourceTree = "<group>"; };
 		DCD1EF3927B21C0500385E55 /* MobileFont.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = MobileFont.ttf; sourceTree = "<group>"; };
 		DCD1EF3A27B21C0500385E55 /* minisystem.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = minisystem.ttf; sourceTree = "<group>"; };
@@ -151,6 +153,7 @@
 				DC0BCA3C2F42ABCC00FE7E98 /* GLASS_EFFECT_FIX.md */,
 				DC0BCA3E2F42AE0400FE7E98 /* GlassEffectView.swift */,
 				DC0BCA402F42B04600FE7E98 /* WindowConfigurator.swift */,
+				DCA4E60E2F54C01C001F4107 /* MetricViews.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -275,6 +278,7 @@
 				DC62B83D27AA385A00F2F109 /* StatusInfo.swift in Sources */,
 				DCADF32E27E6C42500B5D18F /* PreferencesView.swift in Sources */,
 				DC0842A927FA479600999507 /* FontPicker.swift in Sources */,
+				DCA4E60F2F54C01C001F4107 /* MetricViews.swift in Sources */,
 				DC0BCA3F2F42AE0400FE7E98 /* GlassEffectView.swift in Sources */,
 				DC0BCA412F42B04600FE7E98 /* WindowConfigurator.swift in Sources */,
 				DC0BCA2F2F428B0300FE7E98 /* ThemeManager.swift in Sources */,

@@ -8,6 +8,23 @@ enum RefreshCadence: Int {
     case slow = 60     // every 60s
 }
 
+enum DisplayStyle {
+    case text
+    case percentBar
+    case ratePair
+    case sparkline
+}
+
+struct MetricSample {
+    let text: String
+    let primary: Double?
+    let secondary: Double?
+
+    static func text(_ value: String) -> MetricSample {
+        MetricSample(text: value, primary: nil, secondary: nil)
+    }
+}
+
 // MARK: - Async Shell runner
 actor Shell {
     func run(_ command: String, timeout: TimeInterval = 5) async throws -> String {
@@ -273,11 +290,17 @@ struct StatusEntry: Identifiable {
     let name: String
     let category: String
     let cadence: RefreshCadence
-    var commandValue: () async -> String
+    let displayStyle: DisplayStyle
+    let unit: String?
+    let scaleMode: SparklineScaleMode?
+    var commandValue: () async -> MetricSample
     let icon: Image
     var value: String = ""
+    var primaryValue: Double? = nil
+    var secondaryValue: Double? = nil
+    var history: [Double] = []
 
-    func evaluate() async -> String {
+    func evaluate() async -> MetricSample {
         return await commandValue()
     }
 }
@@ -287,6 +310,8 @@ class StatusInfo: ObservableObject {
     @Published var statusEntries: [StatusEntry] = []
     private var timer: Timer?
     private var lastVolumeCount: Int = 0
+    private let performanceSampler = PerformanceSampler()
+    private let maxHistoryCount = 60
 
     private var tick: Int = 0
 
@@ -315,15 +340,19 @@ class StatusInfo: ObservableObject {
         }
     }
 
-	private func buildEntries() async {
+    private func buildEntries() async {
         statusEntries = []
+        let sampler = performanceSampler
 
         statusEntries.append(StatusEntry(
             id: statusEntries.count,
             name: "Current Date",
             category: "General",
             cadence: .medium,
-            commandValue: { Date().formatted(date: .complete, time: .omitted) },
+            displayStyle: .text,
+            unit: nil,
+            scaleMode: nil,
+            commandValue: { MetricSample.text(Date().formatted(date: .complete, time: .omitted)) },
             icon: Image(systemName: "calendar")
         ))
 
@@ -332,7 +361,10 @@ class StatusInfo: ObservableObject {
             name: "Current Time",
             category: "General",
             cadence: .fast,
-            commandValue: { Date().formatted(date: .omitted, time: .complete) },
+            displayStyle: .text,
+            unit: nil,
+            scaleMode: nil,
+            commandValue: { MetricSample.text(Date().formatted(date: .omitted, time: .complete)) },
             icon: Image(systemName: "clock")
         ))
 
@@ -341,7 +373,10 @@ class StatusInfo: ObservableObject {
             name: "Short Hostname",
             category: "General",
             cadence: .medium,
-            commandValue: { Host.current().localizedName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "" },
+            displayStyle: .text,
+            unit: nil,
+            scaleMode: nil,
+            commandValue: { MetricSample.text(Host.current().localizedName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "") },
             icon: Image(systemName: "desktopcomputer.and.arrow.down")
         ))
 
@@ -350,12 +385,15 @@ class StatusInfo: ObservableObject {
             name: "FQDN Hostname",
             category: "Network",
             cadence: .slow,
+            displayStyle: .text,
+            unit: nil,
+            scaleMode: nil,
             commandValue: {
                 do {
                     let output = try await shell.run("hostname -f", timeout: 5)
-                    return output.trimmingCharacters(in: .whitespacesAndNewlines)
+                    return MetricSample.text(output.trimmingCharacters(in: .whitespacesAndNewlines))
                 } catch {
-                    return ""
+                    return MetricSample.text("")
                 }
             },
             icon: Image(systemName: "desktopcomputer.and.arrow.down")
@@ -366,7 +404,10 @@ class StatusInfo: ObservableObject {
             name: "Username",
             category: "General",
             cadence: .medium,
-            commandValue: { "\(NSUserName()) ( \(NSFullUserName()) )".trimmingCharacters(in: .whitespacesAndNewlines) },
+            displayStyle: .text,
+            unit: nil,
+            scaleMode: nil,
+            commandValue: { MetricSample.text("\(NSUserName()) ( \(NSFullUserName()) )".trimmingCharacters(in: .whitespacesAndNewlines)) },
             icon: Image(systemName: "person")
         ))
 
@@ -398,9 +439,12 @@ class StatusInfo: ObservableObject {
                     name: "\(loc) (\(bsd))",
                     category: "Network",
                     cadence: cadenceValue,
+                    displayStyle: .text,
+                    unit: nil,
+                    scaleMode: nil,
                     commandValue: {
                         let ip = await getIPAddress(for: bsd)
-                        return ip.isEmpty ? "No IP" : ip
+                        return MetricSample.text(ip.isEmpty ? "No IP" : ip)
                     },
                     icon: Image(systemName: iconName)
                 ))
@@ -412,8 +456,11 @@ class StatusInfo: ObservableObject {
             name: "Public IP Address",
             category: "Network",
             cadence: .slow,
+            displayStyle: .text,
+            unit: nil,
+            scaleMode: nil,
             commandValue: {
-                return await getPublicIPAddress()
+                return MetricSample.text(await getPublicIPAddress())
             },
             icon: Image(systemName: "network")
         ))
@@ -423,13 +470,16 @@ class StatusInfo: ObservableObject {
             name: "CPU Type",
             category: "System",
             cadence: .slow,
+            displayStyle: .text,
+            unit: nil,
+            scaleMode: nil,
             commandValue: {
                 do {
                     let cmd = "sysctl -n machdep.cpu.brand_string |awk '$1=$1' | sed 's/([A-Z]{1,2})//g'"
                     let result = try await shell.run(cmd, timeout: 5)
-                    return result.trimmingCharacters(in: .whitespacesAndNewlines)
+                    return MetricSample.text(result.trimmingCharacters(in: .whitespacesAndNewlines))
                 } catch {
-                    return ""
+                    return MetricSample.text("")
                 }
             },
             icon: Image(systemName: "cpu")
@@ -440,13 +490,16 @@ class StatusInfo: ObservableObject {
             name: "CPU cores/threads",
             category: "System",
             cadence: .slow,
+            displayStyle: .text,
+            unit: nil,
+            scaleMode: nil,
             commandValue: {
                 do {
                     let cmd = "echo `sysctl -n hw.physicalcpu` '/' `sysctl -n hw.logicalcpu`"
                     let result = try await shell.run(cmd, timeout: 5)
-                    return result.trimmingCharacters(in: .whitespacesAndNewlines)
+                    return MetricSample.text(result.trimmingCharacters(in: .whitespacesAndNewlines))
                 } catch {
-                    return ""
+                    return MetricSample.text("")
                 }
             },
             icon: Image(systemName: "cpu")
@@ -457,14 +510,17 @@ class StatusInfo: ObservableObject {
             name: "RAM",
             category: "System",
             cadence: .slow,
+            displayStyle: .text,
+            unit: nil,
+            scaleMode: nil,
             commandValue: {
                 do {
                     let cmd = "expr `sysctl -n hw.memsize` / 1073741824"
                     let result = try await shell.run(cmd, timeout: 5)
                     let val = result.trimmingCharacters(in: .whitespacesAndNewlines)
-                    return val.isEmpty ? "" : "\(val) GB"
+                    return MetricSample.text(val.isEmpty ? "" : "\(val) GB")
                 } catch {
-                    return ""
+                    return MetricSample.text("")
                 }
             },
             icon: Image(systemName: "memorychip")
@@ -475,13 +531,16 @@ class StatusInfo: ObservableObject {
             name: "Operating System",
             category: "System",
             cadence: .slow,
+            displayStyle: .text,
+            unit: nil,
+            scaleMode: nil,
             commandValue: {
                 do {
                     let cmd = "echo `sw_vers -productName` `sw_vers -productVersion`"
                     let result = try await shell.run(cmd, timeout: 5)
-                    return result.trimmingCharacters(in: .whitespacesAndNewlines)
+                    return MetricSample.text(result.trimmingCharacters(in: .whitespacesAndNewlines))
                 } catch {
-                    return ""
+                    return MetricSample.text("")
                 }
             },
             icon: Image(systemName: "macwindow.on.rectangle")
@@ -492,7 +551,10 @@ class StatusInfo: ObservableObject {
             name: "System Uptime",
             category: "General",
             cadence: .fast,
-            commandValue: { ProcessInfo.processInfo.systemUptime.stringFromTimeInterval().trimmingCharacters(in: .whitespacesAndNewlines) },
+            displayStyle: .text,
+            unit: nil,
+            scaleMode: nil,
+            commandValue: { MetricSample.text(ProcessInfo.processInfo.systemUptime.stringFromTimeInterval().trimmingCharacters(in: .whitespacesAndNewlines)) },
             icon: Image(systemName: "deskclock")
         ))
 
@@ -501,7 +563,10 @@ class StatusInfo: ObservableObject {
             name: "Battery Health",
             category: "Power",
             cadence: .slow,
-            commandValue: { getBatteryHealth() ?? "Unknown" },
+            displayStyle: .text,
+            unit: nil,
+            scaleMode: nil,
+            commandValue: { MetricSample.text(getBatteryHealth() ?? "Unknown") },
             icon: Image(systemName: "bolt")
         ))
 
@@ -510,19 +575,136 @@ class StatusInfo: ObservableObject {
             name: "Battery Percentage",
             category: "Power",
             cadence: .medium,
+            displayStyle: .percentBar,
+            unit: "%",
+            scaleMode: nil,
             commandValue: {
                 if let pct = getBatteryPercentageHealth() {
                     let value: Double = pct <= 1.0 ? pct * 100.0 : pct
                     if value.rounded(.towardZero) == value {
-                        return String(format: "%.0f%%", value)
+                        return MetricSample(text: String(format: "%.0f%%", value), primary: value, secondary: nil)
                     } else {
-                        return String(format: "%.1f%%", value)
+                        return MetricSample(text: String(format: "%.1f%%", value), primary: value, secondary: nil)
                     }
                 } else {
-                    return "Unknown"
+                    return MetricSample.text("Unknown")
                 }
             },
             icon: Image(systemName: "battery.100percent")
+        ))
+
+        statusEntries.append(StatusEntry(
+            id: statusEntries.count,
+            name: "CPU Usage",
+            category: "Performance",
+            cadence: .fast,
+            displayStyle: .sparkline,
+            unit: "%",
+            scaleMode: nil,
+            commandValue: {
+                if let cpu = await sampler.cpuUsagePercent() {
+                    return MetricSample(text: String(format: "%.0f%%", cpu), primary: cpu, secondary: nil)
+                }
+                return MetricSample.text("n/a")
+            },
+            icon: Image(systemName: "waveform.path.ecg")
+        ))
+
+        statusEntries.append(StatusEntry(
+            id: statusEntries.count,
+            name: "Memory Usage",
+            category: "Performance",
+            cadence: .fast,
+            displayStyle: .sparkline,
+            unit: "%",
+            scaleMode: nil,
+            commandValue: {
+                if let memory = await sampler.memoryUsagePercent() {
+                    let formatter = ByteCountFormatter()
+                    formatter.countStyle = .memory
+                    let usedText = formatter.string(fromByteCount: Int64(memory.usedBytes))
+                    let totalText = formatter.string(fromByteCount: Int64(memory.totalBytes))
+                    let text = String(format: "%.0f%% (%@ / %@)", memory.percent, usedText, totalText)
+                    return MetricSample(text: text, primary: memory.percent, secondary: nil)
+                }
+                return MetricSample.text("n/a")
+            },
+            icon: Image(systemName: "memorychip")
+        ))
+
+        statusEntries.append(StatusEntry(
+            id: statusEntries.count,
+            name: "Cached Files",
+            category: "Performance",
+            cadence: .fast,
+            displayStyle: .sparkline,
+            unit: "GB",
+            scaleMode: .fixedRange(min: 0, max: 50),
+            commandValue: {
+                if let memory = await sampler.memoryUsagePercent() {
+                    let formatter = ByteCountFormatter()
+                    formatter.countStyle = .memory
+                    let cachedText = formatter.string(fromByteCount: Int64(memory.cachedBytes))
+                    let percent = (Double(memory.cachedBytes) / Double(memory.totalBytes)) * 100.0
+                    let text = String(format: "%.0f%% (%@)", percent, cachedText)
+                    return MetricSample(text: text, primary: percent, secondary: nil)
+                }
+                return MetricSample.text("n/a")
+            },
+            icon: Image(systemName: "tray.full")
+        ))
+
+        statusEntries.append(StatusEntry(
+            id: statusEntries.count,
+            name: "Network Inbound",
+            category: "Performance",
+            cadence: .fast,
+            displayStyle: .sparkline,
+            unit: "MB/s",
+            scaleMode: nil,
+            commandValue: {
+                if let rates = await sampler.networkThroughput() {
+                    let downMBps = rates.downBps / 1_048_576
+                    return MetricSample(text: String(format: "%.1f MB/s", downMBps), primary: downMBps, secondary: nil)
+                }
+                return MetricSample.text("n/a")
+            },
+            icon: Image(systemName: "arrow.down")
+        ))
+
+        statusEntries.append(StatusEntry(
+            id: statusEntries.count,
+            name: "Network Outbound",
+            category: "Performance",
+            cadence: .fast,
+            displayStyle: .sparkline,
+            unit: "MB/s",
+            scaleMode: nil,
+            commandValue: {
+                if let rates = await sampler.networkThroughput() {
+                    let upMBps = rates.upBps / 1_048_576
+                    return MetricSample(text: String(format: "%.1f MB/s", upMBps), primary: upMBps, secondary: nil)
+                }
+                return MetricSample.text("n/a")
+            },
+            icon: Image(systemName: "arrow.up")
+        ))
+
+        statusEntries.append(StatusEntry(
+            id: statusEntries.count,
+            name: "Disk Throughput",
+            category: "Performance",
+            cadence: .fast,
+            displayStyle: .sparkline,
+            unit: "MB/s",
+            scaleMode: nil,
+            commandValue: {
+                if let disk = await sampler.diskThroughputMBps() {
+                    return MetricSample(text: String(format: "%.1f MB/s", disk), primary: disk, secondary: nil)
+                }
+                return MetricSample.text("n/a")
+            },
+            icon: Image(systemName: "internaldrive")
         ))
 
         // Storage - dynamically discover all mounted volumes
@@ -591,9 +773,12 @@ class StatusInfo: ObservableObject {
                     name: "\(volumeName)",
                     category: "Storage",
                     cadence: .slow,
+                    displayStyle: .text,
+                    unit: nil,
+                    scaleMode: nil,
                     commandValue: {
                         let info = getDiskSpaceInfo(for: volumeURL)
-                        return "\(info.usedCapacity) | \(info.availableCapacity) | \(info.totalCapacity)"
+                        return MetricSample.text("\(info.usedCapacity) | \(info.availableCapacity) | \(info.totalCapacity)")
                     },
                     icon: Image(systemName: iconName)
                 ))
@@ -633,9 +818,18 @@ class StatusInfo: ObservableObject {
         for idx in updated.indices {
             let entry = updated[idx]
             if shouldRefresh(entry: entry, atTick: tick) {
-                let newValue = await entry.commandValue()
-                if newValue != entry.value {
-                    updated[idx].value = newValue
+                let sample = await entry.commandValue()
+                var didAppendHistory = false
+                if entry.displayStyle == .sparkline, let primary = sample.primary {
+                    didAppendHistory = appendHistoryIfNeeded(entryIndex: idx, primary: primary, entries: &updated)
+                }
+                if sample.text != entry.value ||
+                    sample.primary != entry.primaryValue ||
+                    sample.secondary != entry.secondaryValue ||
+                    didAppendHistory {
+                    updated[idx].value = sample.text
+                    updated[idx].primaryValue = sample.primary
+                    updated[idx].secondaryValue = sample.secondary
                     changed = true
                 }
             }
@@ -662,11 +856,26 @@ class StatusInfo: ObservableObject {
     private func populateInitialValues() async {
         var updated = self.statusEntries
         for idx in updated.indices {
-            let newValue = await updated[idx].commandValue()
-            updated[idx].value = newValue
+            let sample = await updated[idx].commandValue()
+            updated[idx].value = sample.text
+            updated[idx].primaryValue = sample.primary
+            updated[idx].secondaryValue = sample.secondary
+            if updated[idx].displayStyle == .sparkline, let primary = sample.primary {
+                _ = appendHistoryIfNeeded(entryIndex: idx, primary: primary, entries: &updated)
+            }
         }
         // Publish once after computing all values
         self.statusEntries = updated
+    }
+
+    private func appendHistoryIfNeeded(entryIndex: Int, primary: Double, entries: inout [StatusEntry]) -> Bool {
+        let style = entries[entryIndex].displayStyle
+        guard style == .sparkline else { return false }
+        entries[entryIndex].history.append(primary)
+        if entries[entryIndex].history.count > maxHistoryCount {
+            entries[entryIndex].history.removeFirst(entries[entryIndex].history.count - maxHistoryCount)
+        }
+        return true
     }
 }
 
@@ -687,4 +896,3 @@ extension TimeInterval {
         return String(format: "%02dd %02dh %02dm %02ds", days, hours, minutes, seconds)
     }
 }
-
