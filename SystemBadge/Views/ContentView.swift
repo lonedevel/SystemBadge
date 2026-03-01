@@ -25,12 +25,17 @@ struct windowSize {
 
 struct ContentView: View {
 	@StateObject private var statusInfo = StatusInfo()
-	@AppStorage("backgroundColor") private var backgroundColor = Color("BackgroundColor")
-	@AppStorage("enableLiquidGlass") private var enableLiquidGlass = true
+    @AppStorage("backgroundColor") private var backgroundColor = Color("BackgroundColor")
+    @AppStorage("enableLiquidGlass") private var enableLiquidGlass = true
     @AppStorage("useSystemColors") private var useSystemColors = true
     @AppStorage("glassCornerRadius") private var glassCornerRadius = 16.0
     @AppStorage("glassTintColor") private var glassTintColorData: Data?
     @AppStorage("glassOpacity") private var glassOpacity = 85.0
+    @AppStorage("showGeneralTab") private var showGeneralTab = true
+    @AppStorage("showNetworkTab") private var showNetworkTab = true
+    @AppStorage("showSystemTab") private var showSystemTab = true
+    @AppStorage("showPowerTab") private var showPowerTab = true
+    @AppStorage("showStorageTab") private var showStorageTab = true
 	@Environment(\.colorScheme) private var colorScheme
 	@ObservedObject var badge: BadgeInfo
 	
@@ -75,74 +80,89 @@ struct ContentView: View {
 			}
 			
 			// Content layer
-			TabView {
-				VStack(spacing: 5) {
-					ScrollView {
-						ForEach(statusInfo.statusEntries.filter{ $0.category.contains("General") }) { item in
-							VStack {
-								StatusEntryView(name: item.name, value: item.value, icon: item.icon)
-							}
-						}
-					}
-					.padding(8)
-				}
-				.tabItem {
-					Label("General", systemImage: "paintpalette")
-				}
-				VStack(spacing: 5) {
-					ScrollView {
-						ForEach(statusInfo.statusEntries.filter{ $0.category.contains("Network") }) { item in
-							VStack {
-								StatusEntryView(name: item.name, value: item.value, icon: item.icon)
-							}
-						}
-					}
-					.padding(8)
-				}
-				.tabItem {
-					Label("Network", systemImage: "network")
-				}
-				VStack(spacing: 5) {
-					ScrollView {
-						ForEach(statusInfo.statusEntries.filter{ $0.category.contains("System") }) { item in
-							VStack {
-								StatusEntryView(name: item.name, value: item.value, icon: item.icon)
-							}
-						}
-					}
-					.padding(8)
-				}
-				.tabItem {
-					Label("System", systemImage: "desktopcomputer")
-				}
-				VStack(spacing: 5) {
-					ScrollView {
-						ForEach(statusInfo.statusEntries.filter{ $0.category.contains("Power") }) { item in
-							VStack {
-								StatusEntryView(name: item.name, value: item.value, icon: item.icon)
-							}
-						}
-					}
-					.padding(8)
-				}
-				.tabItem {
-					Label("Power", systemImage: "bolt.fill")
-				}
-				VStack(spacing: 5) {
-					ScrollView {
-						ForEach(statusInfo.statusEntries.filter{ $0.category.contains("Storage") }) { item in
-							VStack {
-								StatusEntryView(name: item.name, value: item.value, icon: item.icon)
-							}
-						}
-					}
-					.padding(8)
-				}
-				.tabItem {
-					Label("Storage", systemImage: "internaldrive")
-				}
-			}
-		}
+            if showGeneralTab || showNetworkTab || showSystemTab || showPowerTab || showStorageTab {
+                TabView {
+                    if showGeneralTab {
+                        VStack(spacing: 5) {
+                            ScrollView {
+                                ForEach(statusInfo.statusEntries.filter{ $0.category.contains("General") }) { item in
+                                    VStack {
+                                        StatusEntryView(name: item.name, value: item.value, icon: item.icon)
+                                    }
+                                }
+                            }
+                            .padding(8)
+                        }
+                        .tabItem {
+                            Label("General", systemImage: "paintpalette")
+                        }
+                    }
+                    if showNetworkTab {
+                        VStack(spacing: 5) {
+                            ScrollView {
+                                ForEach(statusInfo.statusEntries.filter{ $0.category.contains("Network") }) { item in
+                                    VStack {
+                                        StatusEntryView(name: item.name, value: item.value, icon: item.icon)
+                                    }
+                                }
+                            }
+                            .padding(8)
+                        }
+                        .tabItem {
+                            Label("Network", systemImage: "network")
+                        }
+                    }
+                    if showSystemTab {
+                        VStack(spacing: 5) {
+                            ScrollView {
+                                ForEach(statusInfo.statusEntries.filter{ $0.category.contains("System") }) { item in
+                                    VStack {
+                                        StatusEntryView(name: item.name, value: item.value, icon: item.icon)
+                                    }
+                                }
+                            }
+                            .padding(8)
+                        }
+                        .tabItem {
+                            Label("System", systemImage: "desktopcomputer")
+                        }
+                    }
+                    if showPowerTab {
+                        VStack(spacing: 5) {
+                            ScrollView {
+                                ForEach(statusInfo.statusEntries.filter{ $0.category.contains("Power") }) { item in
+                                    VStack {
+                                        StatusEntryView(name: item.name, value: item.value, icon: item.icon)
+                                    }
+                                }
+                            }
+                            .padding(8)
+                        }
+                        .tabItem {
+                            Label("Power", systemImage: "bolt.fill")
+                        }
+                    }
+                    if showStorageTab {
+                        VStack(spacing: 5) {
+                            ScrollView {
+                                ForEach(statusInfo.statusEntries.filter{ $0.category.contains("Storage") }) { item in
+                                    VStack {
+                                        StatusEntryView(name: item.name, value: item.value, icon: item.icon)
+                                    }
+                                }
+                            }
+                            .padding(8)
+                        }
+                        .tabItem {
+                            Label("Storage", systemImage: "internaldrive")
+                        }
+                    }
+                }
+            } else {
+                Text("Enable at least one tab in Settings > Content.")
+                    .foregroundColor(.secondary)
+            }
+        }
 		.padding(20)
 		.frame(minWidth: windowSize.minWidth,
 			   maxWidth: windowSize.maxWidth,

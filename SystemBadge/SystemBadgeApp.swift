@@ -112,9 +112,7 @@ struct WindowAccessor: NSViewRepresentable {
 @available(macOS 26.0, *)
 @main
 struct SystemBadgeApp: App {
-	@AppStorage("showCpu") private var showCpu = true
-	@AppStorage("showPublicInternet") private var showPublicInternet = true
-	@AppStorage("metricColor") private var metricColor = Color("MetricColor")
+    @AppStorage("metricColor") private var metricColor = Color("MetricColor")
 	@AppStorage("enableLiquidGlass") private var enableLiquidGlass = true
 	
 	var badgeInfo = BadgeInfo()

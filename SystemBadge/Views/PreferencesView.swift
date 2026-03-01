@@ -17,8 +17,11 @@ struct PreferencesView: View {
     @AppStorage("glassCornerRadius") private var glassCornerRadius = 16.0
     @AppStorage("glassTintColor") private var glassTintColorData: Data?
     @AppStorage("glassOpacity") private var glassOpacity = 85.0
-    @AppStorage("showCpu") private var showCpu = true
-    @AppStorage("showPublicInternet") private var showPublicInternet = true
+    @AppStorage("showGeneralTab") private var showGeneralTab = true
+    @AppStorage("showNetworkTab") private var showNetworkTab = true
+    @AppStorage("showSystemTab") private var showSystemTab = true
+    @AppStorage("showPowerTab") private var showPowerTab = true
+    @AppStorage("showStorageTab") private var showStorageTab = true
     @State private var metricFont: NSFont = NSFont.systemFont(ofSize: 24)
     @State private var glassTintColor: Color = .clear
     @State private var enableTint = false
@@ -79,8 +82,11 @@ struct PreferencesView: View {
                 }
 
                 ContentSettingsTab(
-                    showCpu: $showCpu,
-                    showPublicInternet: $showPublicInternet
+                    showGeneralTab: $showGeneralTab,
+                    showNetworkTab: $showNetworkTab,
+                    showSystemTab: $showSystemTab,
+                    showPowerTab: $showPowerTab,
+                    showStorageTab: $showStorageTab
                 )
                 .tabItem {
                     Label("Content", systemImage: "slider.horizontal.3")
@@ -206,14 +212,20 @@ struct ColorSettingsTab: View {
 }
 
 struct ContentSettingsTab: View {
-    @Binding var showCpu: Bool
-    @Binding var showPublicInternet: Bool
+    @Binding var showGeneralTab: Bool
+    @Binding var showNetworkTab: Bool
+    @Binding var showSystemTab: Bool
+    @Binding var showPowerTab: Bool
+    @Binding var showStorageTab: Bool
 
     var body: some View {
         Form {
-            Section("Display Options") {
-                Toggle("Show CPU", isOn: $showCpu)
-                Toggle("Show Public Internet", isOn: $showPublicInternet)
+            Section("Tabs") {
+                Toggle("Show General Tab", isOn: $showGeneralTab)
+                Toggle("Show Network Tab", isOn: $showNetworkTab)
+                Toggle("Show System Tab", isOn: $showSystemTab)
+                Toggle("Show Power Tab", isOn: $showPowerTab)
+                Toggle("Show Storage Tab", isOn: $showStorageTab)
             }
         }
         .formStyle(.grouped)
