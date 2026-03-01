@@ -8,169 +8,222 @@
 import SwiftUI
 
 struct PreferencesView: View {
+    @AppStorage("metricColor") private var metricColor = Color("MetricColor")
+    @AppStorage("labelColor") private var labelColor = Color("LabelColor")
+    @AppStorage("backgroundColor") private var backgroundColor = Color("BackgroundColor")
+    @AppStorage("useSystemColors") private var useSystemColors = true
+    @AppStorage("enableLiquidGlass") private var enableLiquidGlass = true
+    @AppStorage("useCustomColorsWithGlass") private var useCustomColorsWithGlass = true
+    @AppStorage("glassCornerRadius") private var glassCornerRadius = 16.0
+    @AppStorage("glassTintColor") private var glassTintColorData: Data?
+    @AppStorage("glassOpacity") private var glassOpacity = 0.85
+    @AppStorage("showCpu") private var showCpu = true
+    @AppStorage("showPublicInternet") private var showPublicInternet = true
+    @State private var metricFont: NSFont = NSFont.systemFont(ofSize: 24)
+    @State private var glassTintColor: Color = .clear
+    @State private var enableTint = false
+    @Environment(\.colorScheme) private var colorScheme
+
+    private var dynamicBackground: Color {
+        if enableLiquidGlass {
+            return Color.clear
+        }
+        if useSystemColors {
+            return colorScheme == .dark ? Color(NSColor.windowBackgroundColor) : Color(NSColor.controlBackgroundColor)
+        }
+        return backgroundColor
+    }
+
     var body: some View {
-		TabView {
-			AppearanceSettingsView()
-				.tabItem{
-					Label("Appearance", systemImage: "paintpalette")
-				}
-			GlassEffectSettingsView()
-				.tabItem{
-					Label("Glass Effect", systemImage: "sparkles")
-				}
-			ContentSettingsView()
-				.tabItem{
-					Label("Content", systemImage: "gear")
-				}
-		}
-		.padding(20)
-		.frame(width: 450, height: 400)
-	}
+        ZStack {
+            if enableLiquidGlass {
+                GlassEffectView(
+                    cornerRadius: glassCornerRadius,
+                    tintColor: enableTint ? NSColor(glassTintColor) : nil,
+                    material: .contentBackground,
+                    blendingMode: .withinWindow,
+                    opacity: CGFloat(glassOpacity)
+                )
+                .ignoresSafeArea()
+            } else {
+                dynamicBackground
+                    .ignoresSafeArea()
+            }
+
+            TabView {
+                ThemeSettingsTab(
+                    useSystemColors: $useSystemColors,
+                    enableLiquidGlass: $enableLiquidGlass,
+                    useCustomColorsWithGlass: $useCustomColorsWithGlass,
+                    glassOpacity: $glassOpacity,
+                    glassCornerRadius: $glassCornerRadius,
+                    enableTint: $enableTint,
+                    glassTintColor: $glassTintColor,
+                    glassTintColorData: $glassTintColorData
+                )
+                .tabItem {
+                    Label("Theme", systemImage: "paintpalette")
+                }
+
+                ColorSettingsTab(
+                    metricColor: $metricColor,
+                    labelColor: $labelColor,
+                    backgroundColor: $backgroundColor,
+                    useSystemColors: $useSystemColors,
+                    enableLiquidGlass: $enableLiquidGlass,
+                    useCustomColorsWithGlass: $useCustomColorsWithGlass,
+                    metricFont: $metricFont
+                )
+                .tabItem {
+                    Label("Color", systemImage: "eyedropper.full")
+                }
+
+                ContentSettingsTab(
+                    showCpu: $showCpu,
+                    showPublicInternet: $showPublicInternet
+                )
+                .tabItem {
+                    Label("Content", systemImage: "slider.horizontal.3")
+                }
+            }
+            .padding(24)
+        }
+        .frame(width: 520, height: 460)
+        .onAppear {
+            if let colorData = glassTintColorData,
+               let nsColor = try? NSKeyedUnarchiver.unarchivedObject(ofClass: NSColor.self, from: colorData) {
+                glassTintColor = Color(nsColor)
+                enableTint = true
+            } else {
+                enableTint = false
+            }
+        }
+    }
 }
 
-struct AppearanceSettingsView: View {
-	@AppStorage("metricColor") private var metricColor = Color("MetricColor")
-	@AppStorage("labelColor") private var labelColor = Color("LabelColor")
-	@AppStorage("backgroundColor") private var backgroundColor = Color("BackgroundColor")
-	@AppStorage("useSystemColors") private var useSystemColors = true
-	@AppStorage("enableLiquidGlass") private var enableLiquidGlass = true
-	@State private var metricFont: NSFont = NSFont.systemFont(ofSize: 24)
-	@Environment(\.colorScheme) private var colorScheme
+struct ThemeSettingsTab: View {
+    @Binding var useSystemColors: Bool
+    @Binding var enableLiquidGlass: Bool
+    @Binding var useCustomColorsWithGlass: Bool
+    @Binding var glassOpacity: Double
+    @Binding var glassCornerRadius: Double
+    @Binding var enableTint: Bool
+    @Binding var glassTintColor: Color
+    @Binding var glassTintColorData: Data?
+    @Environment(\.colorScheme) private var colorScheme
 
-	var body: some View {
-		Form {
-			Section("Theme") {
-				Toggle("Use System Colors", isOn: $useSystemColors)
-					.help("Automatically adapt to light and dark mode")
-				
-				Toggle("Enable Liquid Glass", isOn: $enableLiquidGlass)
-					.help("Apply modern glass effect to the popover")
-				
-				Text(colorScheme == .dark ? "Current: Dark Mode" : "Current: Light Mode")
-					.font(.caption)
-					.foregroundColor(.secondary)
-			}
-			
-			Section("Custom Colors") {
-				FontPicker("Metric Font", selection: $metricFont)
-				Text("Selected font: \(metricFont.displayName ?? "System Font")")
-					.font(.caption)
-					.foregroundColor(.secondary)
-				
-            ColorPicker("Metric Color", selection: $metricColor)
-                .disabled(useSystemColors)
-				
-            ColorPicker("Label Color", selection: $labelColor)
-                .disabled(useSystemColors)
-				
-				ColorPicker("Background Color", selection: $backgroundColor)
-					.disabled(enableLiquidGlass)
-				
-				if useSystemColors || enableLiquidGlass {
-					Text("Some color options are disabled when using system colors or Liquid Glass")
-						.font(.caption)
-						.foregroundColor(.secondary)
-				}
-			}
-		}
-	}
+    var body: some View {
+        Form {
+            Section("Theme") {
+                Toggle("Use System Colors", isOn: $useSystemColors)
+                    .help("Automatically adapt to light and dark mode")
+
+                Toggle("Enable Liquid Glass", isOn: $enableLiquidGlass)
+                    .help("Apply modern glass effect to the app windows")
+
+                if enableLiquidGlass {
+                    Toggle("Use Custom Colors With Liquid Glass", isOn: $useCustomColorsWithGlass)
+                        .help("Allow metric and label colors when Liquid Glass is enabled")
+                }
+
+                Text(colorScheme == .dark ? "Current: Dark Mode" : "Current: Light Mode")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Section("Glass") {
+                if enableLiquidGlass {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(String(format: "Opacity: %.2f", glassOpacity))
+                        Slider(value: $glassOpacity, in: 0.4...1.0, step: 0.05)
+                            .help("Adjust glass intensity")
+                    }
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Corner Radius: \(Int(glassCornerRadius))")
+                        Slider(value: $glassCornerRadius, in: 0...32, step: 1)
+                            .help("Adjust the roundness of the glass corners")
+                    }
+
+                    Toggle("Enable Glass Tint", isOn: $enableTint)
+                        .help("Add a subtle color tint to the glass effect")
+                        .onChange(of: enableTint) { _, newValue in
+                            if !newValue {
+                                glassTintColorData = nil
+                            }
+                        }
+
+                    if enableTint {
+                        ColorPicker("Glass Tint Color", selection: $glassTintColor)
+                            .onChange(of: glassTintColor) { _, newValue in
+                                let nsColor = NSColor(newValue).withAlphaComponent(0.3)
+                                if let data = try? NSKeyedArchiver.archivedData(withRootObject: nsColor, requiringSecureCoding: false) {
+                                    glassTintColorData = data
+                                }
+                            }
+                    }
+                } else {
+                    Text("Enable Liquid Glass to access glass appearance settings.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+        }
+        .formStyle(.grouped)
+        .environment(\.defaultMinListRowHeight, 34)
+    }
 }
 
-struct GlassEffectSettingsView: View {
-	@AppStorage("enableLiquidGlass") private var enableLiquidGlass = true
-	@AppStorage("glassCornerRadius") private var glassCornerRadius = 16.0
-	@AppStorage("glassTintColor") private var glassTintColorData: Data?
-	@State private var glassTintColor: Color = .clear
-	@State private var enableTint = false
-	
-	var body: some View {
-		Form {
-			Section("Liquid Glass Settings") {
-				Toggle("Enable Liquid Glass Effect", isOn: $enableLiquidGlass)
-					.help("Apply a dynamic glass material to the popover")
-				
-				if enableLiquidGlass {
-					VStack(alignment: .leading) {
-						Text("Corner Radius: \(Int(glassCornerRadius))")
-						Slider(value: $glassCornerRadius, in: 0...32, step: 1)
-							.help("Adjust the roundness of the glass effect corners")
-					}
-					
-					Toggle("Enable Glass Tint", isOn: $enableTint)
-						.help("Add a subtle color tint to the glass effect")
-						.onChange(of: enableTint) { _, newValue in
-							if !newValue {
-								glassTintColorData = nil
-							}
-						}
-					
-					if enableTint {
-						ColorPicker("Glass Tint Color", selection: $glassTintColor)
-							.onChange(of: glassTintColor) { _, newValue in
-								// Convert SwiftUI Color to NSColor and save
-								let nsColor = NSColor(newValue).withAlphaComponent(0.3)
-								if let data = try? NSKeyedArchiver.archivedData(withRootObject: nsColor, requiringSecureCoding: false) {
-									glassTintColorData = data
-								}
-							}
-						
-						Text("Tint colors are applied subtly for best effect")
-							.font(.caption)
-							.foregroundColor(.secondary)
-					}
-				}
-			}
-			
-			Section("About Liquid Glass") {
-				Text("Liquid Glass is a dynamic material that:")
-					.font(.headline)
-				
-				VStack(alignment: .leading, spacing: 8) {
-					Label("Blurs content behind it", systemImage: "wand.and.stars")
-					Label("Reflects surrounding light and color", systemImage: "light.max")
-					Label("Creates a modern, immersive interface", systemImage: "sparkles")
-				}
-				.font(.caption)
-				.foregroundColor(.secondary)
-			}
-			
-			Section("Tips") {
-				VStack(alignment: .leading, spacing: 8) {
-					Text("• For best results, disable custom background colors")
-					Text("• Subtle tints work better than bright colors")
-					Text("• The effect adapts to light and dark mode automatically")
-				}
-				.font(.caption)
-				.foregroundColor(.secondary)
-			}
-		}
-	}
+struct ColorSettingsTab: View {
+    @Binding var metricColor: Color
+    @Binding var labelColor: Color
+    @Binding var backgroundColor: Color
+    @Binding var useSystemColors: Bool
+    @Binding var enableLiquidGlass: Bool
+    @Binding var useCustomColorsWithGlass: Bool
+    @Binding var metricFont: NSFont
+
+    var body: some View {
+        Form {
+            Section("Fonts") {
+                FontPicker("Metric Font", selection: $metricFont)
+            }
+
+            Section("Colors") {
+                ColorPicker("Metric Color", selection: $metricColor)
+                    .disabled(useSystemColors || (enableLiquidGlass && !useCustomColorsWithGlass))
+
+                ColorPicker("Label Color", selection: $labelColor)
+                    .disabled(useSystemColors || (enableLiquidGlass && !useCustomColorsWithGlass))
+
+                ColorPicker("Background Color", selection: $backgroundColor)
+                    .disabled(enableLiquidGlass)
+            }
+        }
+        .formStyle(.grouped)
+        .environment(\.defaultMinListRowHeight, 34)
+    }
 }
 
-struct ContentSettingsView: View {
-	@AppStorage("showCpu") private var showCpu = true
-	@AppStorage("showPublicInternet") private var showPublicInternet = true
-	
-	var body: some View {
-		Form {
-			Section("Display Options") {
-				Toggle("Show CPU", isOn: $showCpu)
-				Toggle("Show Public Internet", isOn: $showPublicInternet)
-			}
-			
-			Section("Storage") {
-				Text("All mounted volumes are automatically detected and displayed.")
-					.font(.caption)
-					.foregroundColor(.secondary)
-			}
-		}
-	}
-}
+struct ContentSettingsTab: View {
+    @Binding var showCpu: Bool
+    @Binding var showPublicInternet: Bool
 
+    var body: some View {
+        Form {
+            Section("Display Options") {
+                Toggle("Show CPU", isOn: $showCpu)
+                Toggle("Show Public Internet", isOn: $showPublicInternet)
+            }
+        }
+        .formStyle(.grouped)
+        .environment(\.defaultMinListRowHeight, 34)
+    }
+}
 
 struct PreferencesView_Previews: PreviewProvider {
     static var previews: some View {
         PreferencesView()
-			.frame(width: 450, height: 400)
+            .frame(width: 520, height: 460)
     }
 }
