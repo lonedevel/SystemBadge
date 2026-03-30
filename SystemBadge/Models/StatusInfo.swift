@@ -1,6 +1,8 @@
 import Foundation
 import SystemConfiguration
 import SwiftUI
+import CoreWLAN
+import CoreLocation
 
 enum RefreshCadence: Int {
     case fast = 1      // every 1s
@@ -284,6 +286,123 @@ func getIconForVolume(volumeURL: URL, isInternal: Bool, isRemovable: Bool, isLoc
     return "externaldrive"
 }
 
+// MARK: - Additional Metrics Helpers
+
+func readKeyValue(_ text: String) -> [String: String] {
+    var result: [String: String] = [:]
+    for line in text.split(whereSeparator: \.isNewline) {
+        let parts = line.split(separator: ":", maxSplits: 1).map { $0.trimmingCharacters(in: .whitespaces) }
+        if parts.count == 2 {
+            result[String(parts[0])] = String(parts[1])
+        }
+    }
+    return result
+}
+
+func parsePmsetBatt(_ text: String) -> (source: String, status: String, time: String) {
+    var source = "Unknown"
+    var status = "Unknown"
+    var time = "Unknown"
+    for line in text.split(whereSeparator: \.isNewline) {
+        if line.contains("Now drawing from") {
+            if let start = line.firstIndex(of: "'"), let end = line.lastIndex(of: "'"), start < end {
+                source = String(line[line.index(after: start)..<end])
+            }
+        }
+        if line.contains("%") {
+            let parts = line.split(separator: ";").map { $0.trimmingCharacters(in: .whitespaces) }
+            if parts.count >= 2 {
+                status = parts[1]
+            }
+            if parts.count >= 3 {
+                time = parts[2]
+            }
+        }
+    }
+    return (source, status, time)
+}
+
+func thermalStateText() -> String {
+    switch ProcessInfo.processInfo.thermalState {
+    case .nominal:
+        return "Nominal"
+    case .fair:
+        return "Fair"
+    case .serious:
+        return "Serious"
+    case .critical:
+        return "Critical"
+    @unknown default:
+        return "Unknown"
+    }
+}
+
+func timeSince(date: Date) -> String {
+    let interval = Date().timeIntervalSince(date)
+    return interval.stringFromTimeInterval()
+}
+
+func wifiDeviceName(from text: String) -> String? {
+    var lines = text.split(whereSeparator: \.isNewline).map { String($0) }
+    while !lines.isEmpty {
+        if lines[0].contains("Hardware Port: Wi-Fi") || lines[0].contains("Hardware Port: AirPort") {
+            if lines.count >= 2, lines[1].contains("Device:") {
+                let parts = lines[1].split(separator: ":").map { $0.trimmingCharacters(in: .whitespaces) }
+                if parts.count == 2, !parts[1].isEmpty {
+                    return parts[1]
+                }
+            }
+        }
+        lines.removeFirst()
+    }
+    return nil
+}
+
+func parseAirportInfoFromSystemProfiler(_ text: String) -> [String: String] {
+    var result: [String: String] = [:]
+    var inCurrentNetwork = false
+    var currentSSID: String?
+    var ssidIndent: Int?
+    for rawLine in text.split(whereSeparator: \.isNewline) {
+        let line = String(rawLine)
+        let indent = line.prefix { $0 == " " }.count
+        let trimmed = line.trimmingCharacters(in: .whitespaces)
+        if trimmed.hasPrefix("Current Network Information:") {
+            inCurrentNetwork = true
+            continue
+        }
+        if inCurrentNetwork, trimmed.hasPrefix("Other Local Wi-Fi Networks:") {
+            break
+        }
+        guard inCurrentNetwork else { continue }
+        if trimmed.isEmpty { continue }
+        if trimmed.hasSuffix(":"), !trimmed.contains(" ") {
+            // SSID line (often no spaces)
+            let ssid = String(trimmed.dropLast())
+            currentSSID = ssid
+            ssidIndent = indent
+            result["SSID"] = ssid
+            continue
+        }
+        if let ssidIndent, indent <= ssidIndent, currentSSID != nil, trimmed.hasSuffix(":") {
+            // New section after SSID
+            break
+        }
+        if trimmed.contains(":") {
+            let parts = trimmed.split(separator: ":", maxSplits: 1).map { $0.trimmingCharacters(in: .whitespaces) }
+            if parts.count == 2 {
+                result[String(parts[0])] = String(parts[1])
+            }
+        }
+    }
+    return result
+}
+
+func getWiFiSSIDCoreWLAN() -> String? {
+    let client = CWWiFiClient.shared()
+    return client.interface()?.ssid()
+}
+
 // MARK: - Status Model
 struct StatusEntry: Identifiable {
     var id: Int
@@ -312,10 +431,13 @@ class StatusInfo: ObservableObject {
     private var lastVolumeCount: Int = 0
     private let performanceSampler = PerformanceSampler()
     private let maxHistoryCount = 60
+    private var wifiProfilerCache: (timestamp: Date, info: [String: String])?
+    private var locationManager: CLLocationManager?
 
     private var tick: Int = 0
 
     init() {
+        requestLocationAccess()
         Task {
             await buildEntries()
         }
@@ -340,9 +462,36 @@ class StatusInfo: ObservableObject {
         }
     }
 
+    private func requestLocationAccess() {
+        let manager = CLLocationManager()
+        locationManager = manager
+        manager.requestWhenInUseAuthorization()
+    }
+
+    private func getWiFiProfilerInfo() async -> [String: String]? {
+        if let cache = wifiProfilerCache, Date().timeIntervalSince(cache.timestamp) < 15 {
+            return cache.info
+        }
+        do {
+            let output = try await shell.run("system_profiler SPAirPortDataType", timeout: 10)
+            let info = parseAirportInfoFromSystemProfiler(output)
+            wifiProfilerCache = (Date(), info)
+            return info
+        } catch {
+            return nil
+        }
+    }
+
     private func buildEntries() async {
         statusEntries = []
         let sampler = performanceSampler
+        let wifiDevice: String
+        do {
+            let ports = try await shell.run("networksetup -listallhardwareports", timeout: 5)
+            wifiDevice = wifiDeviceName(from: ports) ?? "en0"
+        } catch {
+            wifiDevice = "en0"
+        }
 
         statusEntries.append(StatusEntry(
             id: statusEntries.count,
@@ -467,6 +616,98 @@ class StatusInfo: ObservableObject {
 
         statusEntries.append(StatusEntry(
             id: statusEntries.count,
+            name: "Wi-Fi SSID",
+            category: "Network",
+            cadence: .medium,
+            displayStyle: .text,
+            unit: nil,
+            scaleMode: nil,
+            commandValue: { [weak self] in
+                guard let self else { return MetricSample.text("Unavailable") }
+                if let ssid = getWiFiSSIDCoreWLAN(), !ssid.isEmpty {
+                    return MetricSample.text(ssid)
+                }
+                if let info = await self.getWiFiProfilerInfo(), let ssid = info["SSID"], !ssid.isEmpty {
+                    return MetricSample.text(ssid)
+                }
+                do {
+                    let output = try await shell.run("networksetup -getairportnetwork \(wifiDevice)", timeout: 5)
+                    let trimmed = output.trimmingCharacters(in: .whitespacesAndNewlines)
+                    if trimmed.contains("You are not associated") {
+                        return MetricSample.text("Not connected")
+                    }
+                    if let range = trimmed.range(of: ":") {
+                        return MetricSample.text(String(trimmed[range.upperBound...]).trimmingCharacters(in: .whitespaces))
+                    }
+                    return MetricSample.text(trimmed)
+                } catch {
+                    return MetricSample.text("Unavailable")
+                }
+            },
+            icon: Image(systemName: "wifi")
+        ))
+
+        statusEntries.append(StatusEntry(
+            id: statusEntries.count,
+            name: "Wi-Fi Signal (RSSI / Noise)",
+            category: "Network",
+            cadence: .medium,
+            displayStyle: .text,
+            unit: nil,
+            scaleMode: nil,
+            commandValue: { [weak self] in
+                guard let self else { return MetricSample.text("Unavailable") }
+                if let info = await self.getWiFiProfilerInfo() {
+                    if let signalNoise = info["Signal / Noise"], !signalNoise.isEmpty {
+                        return MetricSample.text(signalNoise)
+                    }
+                    let rssi = info["RSSI"] ?? "n/a"
+                    let noise = info["Noise"] ?? "n/a"
+                    return MetricSample.text("\(rssi) / \(noise)")
+                }
+                return MetricSample.text("Unavailable")
+            },
+            icon: Image(systemName: "wifi")
+        ))
+
+        statusEntries.append(StatusEntry(
+            id: statusEntries.count,
+            name: "Wi-Fi Tx Rate",
+            category: "Network",
+            cadence: .medium,
+            displayStyle: .text,
+            unit: nil,
+            scaleMode: nil,
+            commandValue: { [weak self] in
+                guard let self else { return MetricSample.text("Unavailable") }
+                if let info = await self.getWiFiProfilerInfo(), let rate = info["Transmit Rate"], !rate.isEmpty {
+                    return MetricSample.text(rate)
+                }
+                return MetricSample.text("n/a")
+            },
+            icon: Image(systemName: "arrow.up.right.circle")
+        ))
+
+        statusEntries.append(StatusEntry(
+            id: statusEntries.count,
+            name: "Wi-Fi Security",
+            category: "Network",
+            cadence: .slow,
+            displayStyle: .text,
+            unit: nil,
+            scaleMode: nil,
+            commandValue: { [weak self] in
+                guard let self else { return MetricSample.text("Unavailable") }
+                if let info = await self.getWiFiProfilerInfo(), let security = info["Security"], !security.isEmpty {
+                    return MetricSample.text(security)
+                }
+                return MetricSample.text("n/a")
+            },
+            icon: Image(systemName: "lock")
+        ))
+
+        statusEntries.append(StatusEntry(
+            id: statusEntries.count,
             name: "CPU Type",
             category: "System",
             cadence: .slow,
@@ -568,6 +809,89 @@ class StatusInfo: ObservableObject {
             scaleMode: nil,
             commandValue: { MetricSample.text(getBatteryHealth() ?? "Unknown") },
             icon: Image(systemName: "bolt")
+        ))
+
+        statusEntries.append(StatusEntry(
+            id: statusEntries.count,
+            name: "Battery Status",
+            category: "Power",
+            cadence: .medium,
+            displayStyle: .text,
+            unit: nil,
+            scaleMode: nil,
+            commandValue: {
+                do {
+                    let output = try await shell.run("pmset -g batt", timeout: 5)
+                    let parsed = parsePmsetBatt(output)
+                    return MetricSample.text("\(parsed.status) • \(parsed.time)")
+                } catch {
+                    return MetricSample.text("Unavailable")
+                }
+            },
+            icon: Image(systemName: "battery.100percent")
+        ))
+
+        statusEntries.append(StatusEntry(
+            id: statusEntries.count,
+            name: "Power Source",
+            category: "Power",
+            cadence: .medium,
+            displayStyle: .text,
+            unit: nil,
+            scaleMode: nil,
+            commandValue: {
+                do {
+                    let output = try await shell.run("pmset -g batt", timeout: 5)
+                    let parsed = parsePmsetBatt(output)
+                    return MetricSample.text(parsed.source)
+                } catch {
+                    return MetricSample.text("Unavailable")
+                }
+            },
+            icon: Image(systemName: "powerplug")
+        ))
+
+        statusEntries.append(StatusEntry(
+            id: statusEntries.count,
+            name: "Battery Cycle Count",
+            category: "Power",
+            cadence: .slow,
+            displayStyle: .text,
+            unit: nil,
+            scaleMode: nil,
+            commandValue: {
+                do {
+                    let output = try await shell.run("system_profiler SPPowerDataType | awk -F: '/Cycle Count/ {gsub(/ /, \"\", $2); print $2; exit}'", timeout: 5)
+                    let trimmed = output.trimmingCharacters(in: .whitespacesAndNewlines)
+                    return MetricSample.text(trimmed.isEmpty ? "n/a" : trimmed)
+                } catch {
+                    return MetricSample.text("Unavailable")
+                }
+            },
+            icon: Image(systemName: "repeat")
+        ))
+
+        statusEntries.append(StatusEntry(
+            id: statusEntries.count,
+            name: "Power Mode",
+            category: "Power",
+            cadence: .slow,
+            displayStyle: .text,
+            unit: nil,
+            scaleMode: nil,
+            commandValue: {
+                do {
+                    let output = try await shell.run("pmset -g | awk '/lowpowermode/ {low=$2} /highpowermode/ {high=$2} END{print low\":\"high}'", timeout: 5)
+                    let trimmed = output.trimmingCharacters(in: .whitespacesAndNewlines)
+                    let parts = trimmed.split(separator: ":")
+                    let low = (parts.count > 0 && parts[0] == "1") ? "On" : "Off"
+                    let high = (parts.count > 1 && parts[1] == "1") ? "On" : "Off"
+                    return MetricSample.text("Low: \(low) • High: \(high)")
+                } catch {
+                    return MetricSample.text("Unavailable")
+                }
+            },
+            icon: Image(systemName: "bolt.badge.a")
         ))
 
         statusEntries.append(StatusEntry(
@@ -705,6 +1029,197 @@ class StatusInfo: ObservableObject {
                 return MetricSample.text("n/a")
             },
             icon: Image(systemName: "internaldrive")
+        ))
+
+        // Hardware entries temporarily disabled; keep this block commented out
+        /*
+        statusEntries.append(StatusEntry(
+            id: statusEntries.count,
+            name: "Thermal State",
+            category: "Hidden",
+            cadence: .medium,
+            displayStyle: .text,
+            unit: nil,
+            scaleMode: nil,
+            commandValue: {
+                let state = thermalStateText()
+                return MetricSample.text(state)
+            },
+            icon: Image(systemName: "thermometer")
+        ))
+
+        statusEntries.append(StatusEntry(
+            id: statusEntries.count,
+            name: "CPU Thermal Level",
+            category: "Hidden",
+            cadence: .medium,
+            displayStyle: .text,
+            unit: nil,
+            scaleMode: nil,
+            commandValue: {
+                return MetricSample.text("Not available")
+            },
+            icon: Image(systemName: "gauge.with.dots.needle.50percent")
+        ))
+
+        statusEntries.append(StatusEntry(
+            id: statusEntries.count,
+            name: "Fan RPM",
+            category: "Hidden",
+            cadence: .medium,
+            displayStyle: .text,
+            unit: nil,
+            scaleMode: nil,
+            commandValue: {
+                return MetricSample.text("Not available")
+            },
+            icon: Image(systemName: "fan")
+        ))
+
+        statusEntries.append(StatusEntry(
+            id: statusEntries.count,
+            name: "GPU Model",
+            category: "Hidden",
+            cadence: .slow,
+            displayStyle: .text,
+            unit: nil,
+            scaleMode: nil,
+            commandValue: {
+                do {
+                    let output = try await shell.run("system_profiler SPDisplaysDataType | awk -F: '/Chipset Model/ {print $2; exit}'", timeout: 5)
+                    let trimmed = output.trimmingCharacters(in: .whitespacesAndNewlines)
+                    return MetricSample.text(trimmed.isEmpty ? "n/a" : trimmed)
+                } catch {
+                    return MetricSample.text("Unavailable")
+                }
+            },
+            icon: Image(systemName: "display")
+        ))
+
+        statusEntries.append(StatusEntry(
+            id: statusEntries.count,
+            name: "GPU Utilization",
+            category: "Hidden",
+            cadence: .medium,
+            displayStyle: .text,
+            unit: nil,
+            scaleMode: nil,
+            commandValue: {
+                return MetricSample.text("Not available")
+            },
+            icon: Image(systemName: "gauge.high")
+        ))
+
+
+        statusEntries.append(StatusEntry(
+            id: statusEntries.count,
+            name: "Displays",
+            category: "Hidden",
+            cadence: .slow,
+            displayStyle: .text,
+            unit: nil,
+            scaleMode: nil,
+            commandValue: {
+                do {
+                    let output = try await shell.run("system_profiler SPDisplaysDataType | awk -F: '/Resolution/ {print $2; exit}'", timeout: 5)
+                    let trimmed = output.trimmingCharacters(in: .whitespacesAndNewlines)
+                    return MetricSample.text(trimmed.isEmpty ? "n/a" : trimmed)
+                } catch {
+                    return MetricSample.text("Unavailable")
+                }
+            },
+            icon: Image(systemName: "display.2")
+        ))
+
+        statusEntries.append(StatusEntry(
+            id: statusEntries.count,
+            name: "Display Refresh / HDR",
+            category: "Hidden",
+            cadence: .slow,
+            displayStyle: .text,
+            unit: nil,
+            scaleMode: nil,
+            commandValue: {
+                do {
+                    let refresh = try await shell.run("system_profiler SPDisplaysDataType | awk -F: '/Refresh Rate/ {print $2; exit}'", timeout: 5)
+                    let hdr = try await shell.run("system_profiler SPDisplaysDataType | awk -F: '/HDR/ {print $2; exit}'", timeout: 5)
+                    let refreshTrimmed = refresh.trimmingCharacters(in: .whitespacesAndNewlines)
+                    let hdrTrimmed = hdr.trimmingCharacters(in: .whitespacesAndNewlines)
+                    let parts = [refreshTrimmed, hdrTrimmed].filter { !$0.isEmpty }
+                    return MetricSample.text(parts.isEmpty ? "n/a" : parts.joined(separator: " • "))
+                } catch {
+                    return MetricSample.text("Unavailable")
+                }
+            },
+            icon: Image(systemName: "rectangle.and.arrow.up.right.and.arrow.down.left")
+        ))
+        */
+
+        statusEntries.append(StatusEntry(
+            id: statusEntries.count,
+            name: "SMART Status",
+            category: "Storage",
+            cadence: .slow,
+            displayStyle: .text,
+            unit: nil,
+            scaleMode: nil,
+            commandValue: {
+                do {
+                    let output = try await shell.run("diskutil info / | awk -F: '/SMART/ {print $2; exit}'", timeout: 5)
+                    let trimmed = output.trimmingCharacters(in: .whitespacesAndNewlines)
+                    return MetricSample.text(trimmed.isEmpty ? "n/a" : trimmed)
+                } catch {
+                    return MetricSample.text("Unavailable")
+                }
+            },
+            icon: Image(systemName: "stethoscope")
+        ))
+
+        statusEntries.append(StatusEntry(
+            id: statusEntries.count,
+            name: "Last Wake",
+            category: "System",
+            cadence: .medium,
+            displayStyle: .text,
+            unit: nil,
+            scaleMode: nil,
+            commandValue: {
+                do {
+                    let output = try await shell.run("pmset -g log | grep -E ' Wake ' | tail -1", timeout: 5)
+                    let trimmed = output.trimmingCharacters(in: .whitespacesAndNewlines)
+                    let prefix = String(trimmed.prefix(19))
+                    let formatter = DateFormatter()
+                    formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+                    if let date = formatter.date(from: prefix) {
+                        let since = timeSince(date: date)
+                        return MetricSample.text("Last wake: \(since) ago")
+                    }
+                    return MetricSample.text(trimmed.isEmpty ? "n/a" : trimmed)
+                } catch {
+                    return MetricSample.text("Unavailable")
+                }
+            },
+            icon: Image(systemName: "moon.stars")
+        ))
+
+        statusEntries.append(StatusEntry(
+            id: statusEntries.count,
+            name: "Wake Reason",
+            category: "System",
+            cadence: .medium,
+            displayStyle: .text,
+            unit: nil,
+            scaleMode: nil,
+            commandValue: {
+                do {
+                    let output = try await shell.run("pmset -g log | grep -E ' Wake ' | tail -1 | awk -F'Wake reason: ' '{print $2}'", timeout: 5)
+                    let trimmed = output.trimmingCharacters(in: .whitespacesAndNewlines)
+                    return MetricSample.text(trimmed.isEmpty ? "n/a" : trimmed)
+                } catch {
+                    return MetricSample.text("Unavailable")
+                }
+            },
+            icon: Image(systemName: "bolt.horizontal")
         ))
 
         // Storage - dynamically discover all mounted volumes

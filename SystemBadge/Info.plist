@@ -13,5 +13,7 @@
 	<string>.</string>
 	<key>UTImportedTypeDeclarations</key>
 	<array/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>System Badge uses your location to display the current Wi-Fi network name.</string>
 </dict>
 </plist>
